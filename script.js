@@ -45,19 +45,25 @@ const confettiCanvas = document.getElementById("confetti");
 const ctx = confettiCanvas.getContext("2d");
 
 const planner = document.getElementById("planner");
-const dateInput = document.getElementById("dateInput");
-const noteInput = document.getElementById("noteInput");
 const cancelPlanBtn = document.getElementById("cancelPlanBtn");
 const planHint = document.getElementById("planHint");
+const donePlanningBtn = document.getElementById("donePlanningBtn");
 
 const carousel = document.getElementById("carousel");
 const carouselImg = document.getElementById("carouselImg");
 const carouselBadge = document.getElementById("carouselBadge");
-const carouselDots = document.getElementById("carouselDots");
-const prevBtn = document.getElementById("prevBtn");
-const nextBtn = document.getElementById("nextBtn");
 const continueBtn = document.getElementById("continueBtn");
 const backToPlanBtn = document.getElementById("backToPlanBtn");
+
+const gameArea = document.getElementById("gameArea");
+const gameOverlay = document.getElementById("gameOverlay");
+const lockText = document.getElementById("lockText");
+const hintText = document.getElementById("hintText");
+const gamePrompt = document.getElementById("gamePrompt");
+const gameStatus = document.getElementById("gameStatus");
+const ping = document.getElementById("ping");
+const nextPhotoBtn = document.getElementById("nextPhotoBtn");
+
 
 /***********************
  * 3) Initialize text
@@ -107,6 +113,14 @@ function growYesButton() {
   yesBtn.style.transform = `scale(${yesScale})`;
 }
 
+const FULLSCREEN_AFTER_NO_CLICKS = 10; // change this number if you want
+
+function makeYesFullscreen(){
+  yesBtn.classList.add("yes-fullscreen");
+  // optional: stop scaling once fullscreen
+  yesBtn.style.transform = "none";
+}
+
 const noPhrases = [
   "BRUH? 🥺",
   "Like… Really? 😭",
@@ -123,6 +137,11 @@ noBtn.addEventListener("click", () => {
   playMusicSafely();
 
   noCount++;
+  
+  if (noCount >= FULLSCREEN_AFTER_NO_CLICKS) {
+    makeYesFullscreen();
+  }
+  
   growYesButton();
   moveNoButtonAway();
 
@@ -157,6 +176,7 @@ cancelPlanBtn.addEventListener("click", () => {
   // If user is inside an activity, go back to activity picker
   if (selectedActivity) {
     selectedActivity = null;
+    updatePlannerActions();
     renderActivityPicker();
     return;
   }
@@ -172,6 +192,7 @@ restartBtn.addEventListener("click", () => {
   noCount = 0;
   yesScale = 1;
 
+  yesBtn.classList.remove("yes-fullscreen");
   yesBtn.style.transform = "";
   noBtn.style.position = "relative";
   noBtn.style.left = "";
@@ -183,38 +204,22 @@ restartBtn.addEventListener("click", () => {
   result.classList.add("hidden");
 
   planner.classList.add("hidden");
-  dateInput.value = "";
-  timeInput.value = "";
-  placeInput.value = "";
-  noteInput.value = "";
+  selectedActivity = null;
+  renderActivityPicker();
   planHint.textContent = "Tip: pick an activity we can do 😁";
 
   stopConfetti();
 });
 
-nextBtn.addEventListener("click", () => {
-  spawnHearts(3);
-  nextPhoto();
-});
+donePlanningBtn.addEventListener("click", () => {
+  // You can enforce "must have at least one saved plan" if you want:
+  // if (!plans.length) { planHint.textContent = "Nah you have to hangout with me in order to continue 😡"; return; }
 
-prevBtn.addEventListener("click", () => {
-  spawnHearts(3);
-  prevPhoto();
-});
+  planner.classList.add("hidden");
+  carousel.classList.remove("hidden");
 
-// Swipe on the image area (mobile)
-carouselImg.addEventListener("touchstart", (e) => {
-  touchStartX = e.changedTouches[0].screenX;
-});
-
-carouselImg.addEventListener("touchend", (e) => {
-  touchEndX = e.changedTouches[0].screenX;
-  const diff = touchStartX - touchEndX;
-
-  if (Math.abs(diff) < 35) return; // ignore tiny moves
-
-  if (diff > 0) nextPhoto(); // swipe left
-  else prevPhoto(); // swipe right
+  // start the photo game
+  initPhotoGame();
 });
 
 /***********************
@@ -235,6 +240,7 @@ const plannerView = document.getElementById("plannerView");
 const exportTxtBtn = document.getElementById("exportTxtBtn");
 
 renderActivityPicker();
+updatePlannerActions();
 
 exportTxtBtn.onclick = exportTxt;
 
@@ -268,6 +274,7 @@ function renderActivityPicker(){
 
 window.selectActivity = function(id){
   selectedActivity = ACTIVITIES.find(a => a.id === id);
+  updatePlannerActions();
   plannerView.innerHTML = `
     <div class="planner-form">
       <label>
@@ -304,6 +311,7 @@ window.savePlan = async function(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
 
   renderActivityPicker();
+  updatePlannerActions();
 };
 
 window.clearPlans = function () {
@@ -331,45 +339,122 @@ function exportTxt(){
   a.click();
 }
 
+function updatePlannerActions(){
+  // Hide "Done planning" when you're inside an activity form
+  if (selectedActivity) {
+    donePlanningBtn.classList.add("hidden");
+  } else {
+    donePlanningBtn.classList.remove("hidden");
+  }
+}
+
 /***********************
  * Photo Carousel
  ***********************/
-let currentPhotoIndex = 0;
-
 // For swipe support
 let touchStartX = 0;
 let touchEndX = 0;
 
-function renderDots() {
-  carouselDots.innerHTML = "";
-  CAROUSEL_PHOTOS.forEach((_, i) => {
-    const d = document.createElement("div");
-    d.className = "dot" + (i === currentPhotoIndex ? " active" : "");
-    d.addEventListener("click", () => {
-      currentPhotoIndex = i;
-      renderCarousel();
-    });
-    carouselDots.appendChild(d);
-  });
+let unlockedCount = 0;
+let currentPhotoIndex = 0;
+
+let targetX = 50; // percent
+let targetY = 50; // percent
+const HIT_RADIUS = 10; // percent radius (smaller = harder)
+
+function setNewTarget() {
+  targetX = 15 + Math.random() * 70;
+  targetY = 20 + Math.random() * 60;
 }
 
-function renderCarousel() {
-  if (!CAROUSEL_PHOTOS.length) return;
+function updateProgressUI() {
+  carouselBadge.textContent = `${Math.min(unlockedCount + 1, CAROUSEL_PHOTOS.length)} / ${CAROUSEL_PHOTOS.length}`;
+  gameStatus.textContent = `${unlockedCount} / ${CAROUSEL_PHOTOS.length} photos unlocked`;
+}
 
+function lockPhoto() {
+  carouselImg.classList.add("hidden");
+  gameOverlay.classList.remove("hidden");
+  nextPhotoBtn.classList.add("hidden");
+  lockText.textContent = "🔒 Locked";
+  hintText.textContent = "Click around to find the heart 💘";
+  setNewTarget();
+  updateProgressUI();
+}
+
+function revealPhoto() {
   carouselImg.src = CAROUSEL_PHOTOS[currentPhotoIndex];
-  carouselBadge.textContent = `${currentPhotoIndex + 1} / ${CAROUSEL_PHOTOS.length}`;
-  renderDots();
+  carouselImg.classList.remove("hidden");
+  gameOverlay.classList.add("hidden");
+  nextPhotoBtn.classList.remove("hidden");
+  spawnHearts(18);
 }
 
-function nextPhoto() {
-  currentPhotoIndex = (currentPhotoIndex + 1) % CAROUSEL_PHOTOS.length;
-  renderCarousel();
+function distanceHint(dist) {
+  if (dist < 6) return "SO CLOSE 😳";
+  if (dist < 10) return "Warmer 👀";
+  if (dist < 16) return "Getting there 🙂";
+  return "Cold 🥶";
 }
 
-function prevPhoto() {
-  currentPhotoIndex = (currentPhotoIndex - 1 + CAROUSEL_PHOTOS.length) % CAROUSEL_PHOTOS.length;
-  renderCarousel();
+function showPing(xPx, yPx) {
+  ping.classList.remove("hidden");
+  ping.style.left = `${xPx}px`;
+  ping.style.top = `${yPx}px`;
+
+  ping.style.animation = "none";
+  ping.offsetHeight; // reflow
+  ping.style.animation = "";
+
+  setTimeout(() => ping.classList.add("hidden"), 600);
 }
+
+function initPhotoGame() {
+  unlockedCount = 0;
+  currentPhotoIndex = 0;
+  gamePrompt.textContent = "Find the hidden heart to reveal the next photo 👀";
+  lockPhoto();
+}
+
+gameArea.addEventListener("click", (e) => {
+  if (unlockedCount >= CAROUSEL_PHOTOS.length) return;
+
+  const rect = gameArea.getBoundingClientRect();
+  const x = ((e.clientX - rect.left) / rect.width) * 100;
+  const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+  showPing(e.clientX - rect.left, e.clientY - rect.top);
+
+  const dx = x - targetX;
+  const dy = y - targetY;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  if (dist <= HIT_RADIUS) {
+    lockText.textContent = "💖 Found it!";
+    hintText.textContent = "Unlocked 😤";
+    revealPhoto();
+  } else {
+    hintText.textContent = distanceHint(dist);
+  }
+});
+
+nextPhotoBtn.addEventListener("click", () => {
+  unlockedCount++;
+
+  if (unlockedCount >= CAROUSEL_PHOTOS.length) {
+    nextPhotoBtn.classList.add("hidden");
+    gamePrompt.textContent = "All photos unlocked 🥹💞";
+    lockText.textContent = "✅ Complete";
+    hintText.textContent = "Press Continue 💘";
+    updateProgressUI();
+    spawnHearts(12);
+    return;
+  }
+
+  currentPhotoIndex = unlockedCount;
+  lockPhoto();
+  spawnHearts(8);
+});
 
 /***********************
  * 5) Floating hearts
