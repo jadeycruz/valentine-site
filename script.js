@@ -1,17 +1,16 @@
 console.log("script.js is running ✅");
-alert("Hello from JS!");
 
 /***********************
  * 1) Easy customization
  ***********************/
 const CONFIG = {
-  recipientName: "Jade", // <-- change this
+  recipientName: "Nathaniel", // <-- change this
   toLine: "To: ",
   mainMessage: "Will you be my Valentine? 💖",
-  subMessage: "I promise snacks, hugs, and a very cute date.",
+  subMessage: "I promise to stop being annoying and lazy and a fatass.",
   yesResultTitle: "YAYYYYY!!! 💘",
   yesResultText: "Best decision ever. I’m so excited!!!",
-  yesButtonText: "Yes",
+  yesButtonText: "YES",
   noButtonText: "No",
 };
 
@@ -37,6 +36,15 @@ const bgMusic = document.getElementById("bgMusic");
 
 const confettiCanvas = document.getElementById("confetti");
 const ctx = confettiCanvas.getContext("2d");
+
+const planner = document.getElementById("planner");
+const dateInput = document.getElementById("dateInput");
+const timeInput = document.getElementById("timeInput");
+const placeInput = document.getElementById("placeInput");
+const noteInput = document.getElementById("noteInput");
+const lockBtn = document.getElementById("lockBtn");
+const cancelPlanBtn = document.getElementById("cancelPlanBtn");
+const planHint = document.getElementById("planHint");
 
 /***********************
  * 3) Initialize text
@@ -87,12 +95,15 @@ function growYesButton() {
 }
 
 const noPhrases = [
-  "Are you sure? 🥺",
-  "Like… 100% sure? 😭",
-  "Please reconsider 😳",
-  "I made you hearts tho 💗",
-  "Ok wow… rude (jk) 😈",
-  "Last chance!!!",
+  "BRUH? 🥺",
+  "Like… Really? 😭",
+  "Stop this! 😳",
+  "I promise to not be annoying tho 💗",
+  "Ok wow… rude! 😈",
+  "So you hate me? 😭",
+  "So you'd rather I dissapear? 😭",
+  "I'm telling gma and mom that you hate me. 😡",
+  "You know... you can just click YES and this would be over.",
 ];
 
 noBtn.addEventListener("click", () => {
@@ -112,20 +123,86 @@ noBtn.addEventListener("click", () => {
 
 // Bonus: make it harder by also moving when hovered (desktop)
 noBtn.addEventListener("mouseenter", () => {
-  if (noCount >= 2) moveNoButtonAway();
+  if (noCount >= 1) moveNoButtonAway();
 });
 
 yesBtn.addEventListener("click", () => {
   playMusicSafely();
 
-  // Hide buttons & show result
+  // Hide the buttons and open planner instead of final result
   btnRow.classList.add("hidden");
   hint.classList.add("hidden");
-  result.classList.remove("hidden");
+
+  planner.classList.remove("hidden");
 
   // Confetti + hearts party
   startConfetti();
+  spawnHearts(18);
+});
+
+cancelPlanBtn.addEventListener("click", () => {
+  planner.classList.add("hidden");
+  btnRow.classList.remove("hidden");
+  hint.classList.remove("hidden");
+});
+
+lockBtn.addEventListener("click", async () => {
+  const date = dateInput.value;
+  const time = timeInput.value;
+  const place = placeInput.value.trim();
+  const note = noteInput.value.trim();
+
+  if (!date || !time || !place) {
+    planHint.textContent = "Fill in date, time, and restaurant/activity 👀";
+    spawnHearts(6);
+    return;
+  }
+
+  planHint.textContent = "Locked in 😤💘";
+
+  // Build a cute summary
+  const summary =
+`Date Plan 💖
+To: ${CONFIG.recipientName}
+
+📅 Date: ${date}
+🕒 Time: ${time}
+📍 Place: ${place}
+💌 Note: ${note || "(none)"}
+`;
+
+  // Show final result screen
+  planner.classList.add("hidden");
+  result.classList.remove("hidden");
+
+  // Customize the final message with the plan
+  resultTitle.textContent = "It’s a date!!! 💞";
+  resultText.textContent = `Okayyy so we’re doing ${place} on ${date} at ${time}. I’m excited 😳`;
+
+  // Confetti party
+  startConfetti();
   spawnHearts(40);
+
+  // Add a copy button if it doesn't exist yet
+  let copyBtn = document.getElementById("copyPlanBtn");
+  if (!copyBtn) {
+    copyBtn = document.createElement("button");
+    copyBtn.id = "copyPlanBtn";
+    copyBtn.className = "btn secondary";
+    copyBtn.textContent = "Copy plan 📋";
+    result.appendChild(copyBtn);
+
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(summary);
+        copyBtn.textContent = "Copied! 💘";
+        setTimeout(() => (copyBtn.textContent = "Copy plan 📋"), 1400);
+      } catch {
+        copyBtn.textContent = "Copy failed 😭";
+        setTimeout(() => (copyBtn.textContent = "Copy plan 📋"), 1400);
+      }
+    });
+  }
 });
 
 restartBtn.addEventListener("click", () => {
@@ -138,10 +215,17 @@ restartBtn.addEventListener("click", () => {
   noBtn.style.left = "";
   noBtn.style.top = "";
 
-  hint.textContent = "Tip: try pressing “No” 😈";
+  hint.textContent = "Tip: Don't you fkn dare press NO.";
   btnRow.classList.remove("hidden");
   hint.classList.remove("hidden");
   result.classList.add("hidden");
+
+  planner.classList.add("hidden");
+  dateInput.value = "";
+  timeInput.value = "";
+  placeInput.value = "";
+  noteInput.value = "";
+  planHint.textContent = "Tip: pick a date/time so we can make it official 👀";
 
   stopConfetti();
 });

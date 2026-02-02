@@ -113,6 +113,69 @@ h1{
 }
 .hidden{ display: none; }
 
+/* Planner panel */
+.planner{
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.75);
+  text-align: left;
+}
+
+.planner h2{
+  margin: 0 0 12px;
+  text-align: center;
+}
+
+.planner-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.planner-grid label{
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+.planner-grid input,
+.planner-grid textarea{
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  outline: none;
+  font-size: 14px;
+  background: rgba(255,255,255,0.85);
+}
+
+.planner-grid .full{
+  grid-column: 1 / -1;
+}
+
+.planner-actions{
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.tiny{
+  text-align: center;
+  margin: 10px 0 0;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+@media (max-width: 420px){
+  .planner-grid{ grid-template-columns: 1fr; }
+}
+
+
 /* ========== Floating hearts ========== */
 #hearts-layer{
   position: fixed;

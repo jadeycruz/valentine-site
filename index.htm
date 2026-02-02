@@ -15,25 +15,55 @@
     <p class="to-line" id="toLine"></p>
 
     <h1 id="mainMessage">Will you be my Valentine? 💖</h1>
-    <p class="sub" id="subMessage">I promise snacks, hugs, and a very cute date.</p>
+    <p class="sub" id="subMessage">I promise to stop being annoying and lazy and a fatass.</p>
 
     <div class="btn-row" id="btnRow">
-      <button id="yesBtn" class="btn yes">Yes</button>
+      <button id="yesBtn" class="btn yes">YES</button>
       <button id="noBtn" class="btn no">No</button>
     </div>
 
-    <p class="hint" id="hint">Tip: try pressing “No” 😈</p>
+    <p class="hint" id="hint">Tip: Don't you fkn dare press "No".</p>
 
     <section class="result hidden" id="result">
-      <h2 id="resultTitle">YAYYYYY!!! 💘</h2>
-      <p id="resultText">Best decision ever. I’m so excited!!!</p>
+      <h2 id="resultTitle">YAYYYYY!!! 💘 Let's plan some stuff together.</h2>
+      
+        <div class="planner-grid">
+          <label>
+            Date
+            <input type="date" id="dateInput" />
+          </label>
+
+          <label>
+            Time
+            <input type ="time" id="timeInput" />
+          </label>
+
+          <label class="full">
+            Restaurant / Activity
+            <input type="text" id="placeInput" placeholder="e.g., ramen + dessert 🥭"
+          </label>
+
+          <label class="full">
+            Note (optional)
+            <textarea id="noteInput" rows="3" placeholder="e.g., wear something cute"></textarea>          </textarea>
+          </label>
+        </div>
+
+        <div class="planner-actions">
+          <button id="lockBtn" class="btn yes"> Lock it in ✅</button>
+          <button id="cancelPlanbtn" class="btn secondary">Back</button>
+        </div>
+
+        <p class="tiny" id="planHint"> Tip: pick a date/time so we can make it official 👀</p>   
+      
+      <p id="resultText">You made the right choice young one. Hehe!</p>
       <button id="restartBtn" class="btn secondary">Replay</button>
+      
     </section>
 
     <audio id="bgMusic" preload="auto" loop>
       <!-- Option A: use your own file by placing it in the folder and naming it music.mp3 -->
       <source src="music.mp3" type="audio/mpeg" />
-      <!-- Option B: if you don't have a file, the site will still work (just silent) -->
     </audio>
   </main>
 
