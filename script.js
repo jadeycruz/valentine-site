@@ -142,19 +142,25 @@ noBtn.addEventListener("click", () => {
   playMusicSafely();
 
   noCount++;
-  
+
+  // Once we hit fullscreen, don't keep scaling/moving stuff
   if (noCount >= FULLSCREEN_AFTER_NO_CLICKS) {
     makeYesFullscreen();
+
+    // still do the fun text + hearts if you want
+    const phrase = noPhrases[Math.min(noCount - 1, noPhrases.length - 1)];
+    hint.textContent = phrase;
+    spawnHearts(6 + noCount * 2);
+
+    return; // IMPORTANT: prevents growYesButton() from running
   }
-  
+
   growYesButton();
   moveNoButtonAway();
 
-  // Change hint text to something playful
   const phrase = noPhrases[Math.min(noCount - 1, noPhrases.length - 1)];
   hint.textContent = phrase;
 
-  // Make hearts spawn faster as "No" increases
   spawnHearts(6 + noCount * 2);
 });
 
