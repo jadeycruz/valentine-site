@@ -24,38 +24,41 @@
 
     <p class="hint" id="hint">Tip: Don't you fkn dare press "No".</p>
 
+    <section class="planner hidden" id="planner">
+      <h2>Yay! Let’s plan our date 💘</h2>
+
+      <div class="planner-grid">
+        <label>
+          Date
+          <input type="date" id="dateInput" />
+        </label>
+
+        <label>
+          Time
+          <input type="time" id="timeInput" />
+        </label>
+
+        <label class="full">
+          Restaurant / Activity
+          <input type="text" id="placeInput" placeholder="e.g., ramen + dessert 🍜🍰" />
+        </label>
+
+        <label class="full">
+          Note (optional)
+          <textarea id="noteInput" rows="3" placeholder="e.g., wear something cute 😳"></textarea>
+        </label>
+      </div>
+
+      <div class="planner-actions">
+        <button id="lockBtn" class="btn yes">Lock it in ✅</button>
+        <button id="cancelPlanBtn" class="btn secondary">Back</button>
+      </div>
+
+      <p class="tiny" id="planHint">Tip: pick a date/time so we can make it official 👀</p>
+    </section>
+
     <section class="result hidden" id="result">
-      <h2 id="resultTitle">YAYYYYY!!! 💘 Let's plan some stuff together.</h2>
-      
-        <div class="planner-grid">
-          <label>
-            Date
-            <input type="date" id="dateInput" />
-          </label>
-
-          <label>
-            Time
-            <input type ="time" id="timeInput" />
-          </label>
-
-          <label class="full">
-            Restaurant / Activity
-            <input type="text" id="placeInput" placeholder="e.g., ramen + dessert 🥭"
-          </label>
-
-          <label class="full">
-            Note (optional)
-            <textarea id="noteInput" rows="3" placeholder="e.g., wear something cute"></textarea>          </textarea>
-          </label>
-        </div>
-
-        <div class="planner-actions">
-          <button id="lockBtn" class="btn yes"> Lock it in ✅</button>
-          <button id="cancelPlanbtn" class="btn secondary">Back</button>
-        </div>
-
-        <p class="tiny" id="planHint"> Tip: pick a date/time so we can make it official 👀</p>   
-      
+      <h2 id="resultTitle">YAYYYYY!!! 💘 Let's plan some stuff together.</h2>  
       <p id="resultText">You made the right choice young one. Hehe!</p>
       <button id="restartBtn" class="btn secondary">Replay</button>
       

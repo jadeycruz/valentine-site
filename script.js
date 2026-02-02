@@ -123,7 +123,7 @@ noBtn.addEventListener("click", () => {
 
 // Bonus: make it harder by also moving when hovered (desktop)
 noBtn.addEventListener("mouseenter", () => {
-  if (noCount >= 1) moveNoButtonAway();
+  if (noCount >= 3) moveNoButtonAway();
 });
 
 yesBtn.addEventListener("click", () => {
