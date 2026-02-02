@@ -14,6 +14,13 @@ const CONFIG = {
   noButtonText: "No",
 };
 
+// Put your photos in the same folder OR use an /photos folder.
+const CAROUSEL_PHOTOS = [
+  "photos/photo1.jpg",
+  "photos/photo2.jpg",
+  "photos/photo3.jpg",
+];
+
 /***********************
  * 2) Grab elements
  ***********************/
@@ -42,6 +49,15 @@ const dateInput = document.getElementById("dateInput");
 const noteInput = document.getElementById("noteInput");
 const cancelPlanBtn = document.getElementById("cancelPlanBtn");
 const planHint = document.getElementById("planHint");
+
+const carousel = document.getElementById("carousel");
+const carouselImg = document.getElementById("carouselImg");
+const carouselBadge = document.getElementById("carouselBadge");
+const carouselDots = document.getElementById("carouselDots");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const continueBtn = document.getElementById("continueBtn");
+const backToPlanBtn = document.getElementById("backToPlanBtn");
 
 /***********************
  * 3) Initialize text
@@ -176,14 +192,39 @@ restartBtn.addEventListener("click", () => {
   stopConfetti();
 });
 
+nextBtn.addEventListener("click", () => {
+  spawnHearts(3);
+  nextPhoto();
+});
+
+prevBtn.addEventListener("click", () => {
+  spawnHearts(3);
+  prevPhoto();
+});
+
+// Swipe on the image area (mobile)
+carouselImg.addEventListener("touchstart", (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+});
+
+carouselImg.addEventListener("touchend", (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  const diff = touchStartX - touchEndX;
+
+  if (Math.abs(diff) < 35) return; // ignore tiny moves
+
+  if (diff > 0) nextPhoto(); // swipe left
+  else prevPhoto(); // swipe right
+});
+
 /***********************
  * Planner: Activities
  ***********************/
 const ACTIVITIES = [
-  { id: "dinner", name: "Dinner Date", img: "dinner.gif" },
-  { id: "movie", name: "Movie Night", img: "movie.gif" },
-  { id: "skating", name: "Ice Skating", img: "skating.gif" },
-  { id: "chilling", name: "Just Chill", img: "chilling.gif" },
+  { id: "dinner", name: "Dinner Date", img: "activity/dinner.gif" },
+  { id: "movie", name: "Movie Night", img: "activity/movie.gif" },
+  { id: "skating", name: "Ice Skating", img: "activity/skating.gif" },
+  { id: "chilling", name: "Just Chill", img: "activity/chilling.gif" },
 ];
 
 const STORAGE_KEY = "valentine_plans";
@@ -200,6 +241,7 @@ exportTxtBtn.onclick = exportTxt;
 function renderActivityPicker(){
   plannerView.innerHTML = `
     <p class="tiny">Choose an activity:</p>
+
     <div class="activity-grid">
       ${ACTIVITIES.map(a => `
         <button class="activity-btn" onclick="selectActivity('${a.id}')">
@@ -210,8 +252,16 @@ function renderActivityPicker(){
     </div>
 
     <div class="saved-list">
-      <strong>Saved plans:</strong>
-      ${plans.map(p => `<div>• ${p.date} — ${p.activity}</div>`).join("") || "None yet"}
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <strong>Saved plans:</strong>
+        <button class="btn secondary" onclick="clearPlans()">Clear ✖</button>
+      </div>
+
+      ${
+        plans.length
+          ? plans.map(p => `<div>• ${p.date} — ${p.activity}</div>`).join("")
+          : "<div class='tiny'>None yet</div>"
+      }
     </div>
   `;
 }
@@ -256,6 +306,19 @@ window.savePlan = async function(){
   renderActivityPicker();
 };
 
+window.clearPlans = function () {
+  const confirmDelete = confirm(
+    "Delete all saved plans? 💔"
+  );
+
+  if (!confirmDelete) return;
+
+  plans = [];
+  localStorage.removeItem(STORAGE_KEY);
+
+  renderActivityPicker();
+};
+
 function exportTxt(){
   const text = plans.map(p =>
     `${p.date} | ${p.activity} | ${p.note || "(no note)"}`
@@ -266,6 +329,46 @@ function exportTxt(){
   a.href = URL.createObjectURL(blob);
   a.download = "valentine-plans.txt";
   a.click();
+}
+
+/***********************
+ * Photo Carousel
+ ***********************/
+let currentPhotoIndex = 0;
+
+// For swipe support
+let touchStartX = 0;
+let touchEndX = 0;
+
+function renderDots() {
+  carouselDots.innerHTML = "";
+  CAROUSEL_PHOTOS.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = "dot" + (i === currentPhotoIndex ? " active" : "");
+    d.addEventListener("click", () => {
+      currentPhotoIndex = i;
+      renderCarousel();
+    });
+    carouselDots.appendChild(d);
+  });
+}
+
+function renderCarousel() {
+  if (!CAROUSEL_PHOTOS.length) return;
+
+  carouselImg.src = CAROUSEL_PHOTOS[currentPhotoIndex];
+  carouselBadge.textContent = `${currentPhotoIndex + 1} / ${CAROUSEL_PHOTOS.length}`;
+  renderDots();
+}
+
+function nextPhoto() {
+  currentPhotoIndex = (currentPhotoIndex + 1) % CAROUSEL_PHOTOS.length;
+  renderCarousel();
+}
+
+function prevPhoto() {
+  currentPhotoIndex = (currentPhotoIndex - 1 + CAROUSEL_PHOTOS.length) % CAROUSEL_PHOTOS.length;
+  renderCarousel();
 }
 
 /***********************

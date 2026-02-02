@@ -284,3 +284,110 @@ h1{
   display: flex;
   justify-content: center;
 }
+
+/* ===== Photo Carousel ===== */
+.carousel{
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.75);
+  text-align: center;
+}
+
+.carousel-title{
+  margin: 0 0 12px;
+}
+
+.carousel-frame{
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  gap: 10px;
+  align-items: center;
+}
+
+.carousel-image-wrap{
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.75);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.10);
+}
+
+.carousel-image-wrap img{
+  width: 100%;
+  height: min(320px, 52vw);
+  object-fit: cover;
+  display: block;
+}
+
+.carousel-badge{
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.carousel-btn{
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  font-size: 22px;
+  font-weight: 900;
+  cursor: pointer;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 10px 18px rgba(0,0,0,0.10);
+  transition: transform 160ms ease;
+}
+
+.carousel-btn:active{
+  transform: scale(0.96);
+}
+
+.carousel-dots{
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.dot{
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.18);
+  background: rgba(0,0,0,0.12);
+  cursor: pointer;
+}
+
+.dot.active{
+  background: rgba(255,77,109,0.9);
+  border-color: rgba(255,77,109,0.9);
+}
+
+.carousel-actions{
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+@media (max-width: 420px){
+  .carousel-frame{
+    grid-template-columns: 34px 1fr 34px;
+  }
+  .carousel-btn{
+    width: 34px;
+    height: 34px;
+    font-size: 20px;
+  }
+}
