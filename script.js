@@ -115,15 +115,26 @@ function growYesButton() {
 
 const FULLSCREEN_AFTER_NO_CLICKS = 10; // change this number if you want
 
-function makeYesFullscreen() {
-  yesBtn.classList.add("yes-fullscreen");
+let yesOverlayEl = null;
 
-  // HARD reset any inline movement / scaling
+function makeYesFullscreen() {
+  // Create overlay once
+  if (!yesOverlayEl) {
+    yesOverlayEl = document.createElement("div");
+    yesOverlayEl.id = "yesOverlay";
+    document.body.appendChild(yesOverlayEl);
+  }
+
+  // Move YES button into the overlay (this avoids any parent positioning/filter issues)
+  yesOverlayEl.appendChild(yesBtn);
+
+  // Hard reset inline styles (in case scaling happened before)
+  yesBtn.style.position = "static";
+  yesBtn.style.left = "";
+  yesBtn.style.top = "";
+  yesBtn.style.right = "";
+  yesBtn.style.bottom = "";
   yesBtn.style.transform = "none";
-  yesBtn.style.top = "0";
-  yesBtn.style.left = "0";
-  yesBtn.style.right = "auto";
-  yesBtn.style.bottom = "auto";
 }
 
 const noPhrases = [
@@ -172,6 +183,15 @@ noBtn.addEventListener("mouseenter", () => {
 yesBtn.addEventListener("click", () => {
   playMusicSafely();
 
+  // ✅ If YES is currently fullscreen, remove overlay so planner is clickable/visible
+  if (yesOverlayEl) {
+    // put YES back into original row (optional but keeps layout clean)
+    btnRow.insertBefore(yesBtn, btnRow.firstChild);
+
+    yesOverlayEl.remove();
+    yesOverlayEl = null;
+  }
+
   // Hide the buttons and open planner instead of final result
   btnRow.classList.add("hidden");
   hint.classList.add("hidden");
@@ -202,6 +222,15 @@ restartBtn.addEventListener("click", () => {
   // Reset everything
   noCount = 0;
   yesScale = 1;
+
+  // Put YES button back into the original button row
+  btnRow.insertBefore(yesBtn, btnRow.firstChild);
+
+  // Remove overlay if it exists
+  if (yesOverlayEl) {
+    yesOverlayEl.remove();
+    yesOverlayEl = null;
+  }
 
   yesBtn.classList.remove("yes-fullscreen");
   yesBtn.removeAttribute("style"); // wipes leftover inline styles

@@ -132,6 +132,24 @@ h1{
   padding: 0 !important;
 }
 
+/* Fullscreen overlay that sits on top of everything */
+#yesOverlay{
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+}
+
+/* Make the YES button truly fill the overlay */
+#yesOverlay .btn{
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  margin: 0;
+  transform: none !important;
+  font-size: clamp(32px, 8vw, 72px);
+}
+
 /* Result panel */
 .result{
   margin-top: 18px;
