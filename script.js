@@ -115,10 +115,15 @@ function growYesButton() {
 
 const FULLSCREEN_AFTER_NO_CLICKS = 10; // change this number if you want
 
-function makeYesFullscreen(){
+function makeYesFullscreen() {
   yesBtn.classList.add("yes-fullscreen");
-  // optional: stop scaling once fullscreen
+
+  // HARD reset any inline movement / scaling
   yesBtn.style.transform = "none";
+  yesBtn.style.top = "0";
+  yesBtn.style.left = "0";
+  yesBtn.style.right = "auto";
+  yesBtn.style.bottom = "auto";
 }
 
 const noPhrases = [
@@ -193,6 +198,7 @@ restartBtn.addEventListener("click", () => {
   yesScale = 1;
 
   yesBtn.classList.remove("yes-fullscreen");
+  yesBtn.removeAttribute("style"); // wipes leftover inline styles
   yesBtn.style.transform = "";
   noBtn.style.position = "relative";
   noBtn.style.left = "";

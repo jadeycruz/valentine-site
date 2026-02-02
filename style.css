@@ -104,17 +104,28 @@ h1{
 }
 
 /* YES button goes fullscreen after enough "No" clicks */
-.yes-fullscreen{
+.yes-fullscreen {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+
   width: 100vw;
   height: 100vh;
-  border-radius: 0;
-  z-index: 9999;
-  transform: none !important;
 
-  display: grid;
-  place-items: center;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+
+  z-index: 9999;
+
+  /* HARD reset anything applied earlier */
+  transform: none !important;
+  right: auto;
+  bottom: auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   font-size: clamp(32px, 8vw, 72px);
 }
