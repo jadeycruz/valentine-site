@@ -278,3 +278,9 @@ h1{
   margin-top: 12px;
   font-size: 13px;
 }
+
+.planner-export{
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+}

@@ -138,6 +138,14 @@ yesBtn.addEventListener("click", () => {
 });
 
 cancelPlanBtn.addEventListener("click", () => {
+  // If user is inside an activity, go back to activity picker
+  if (selectedActivity) {
+    selectedActivity = null;
+    renderActivityPicker();
+    return;
+  }
+
+  // Otherwise, exit planner entirely (back to start)
   planner.classList.add("hidden");
   btnRow.classList.remove("hidden");
   hint.classList.remove("hidden");
@@ -181,17 +189,13 @@ const ACTIVITIES = [
 const STORAGE_KEY = "valentine_plans";
 let selectedActivity = null;
 let plans = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-let fileHandle = null;
 
 const plannerView = document.getElementById("plannerView");
 const exportTxtBtn = document.getElementById("exportTxtBtn");
-const connectTxtBtn = document.getElementById("connectTxtBtn");
-const fileStatus = document.getElementById("fileStatus");
 
 renderActivityPicker();
 
 exportTxtBtn.onclick = exportTxt;
-connectTxtBtn.onclick = connectTxt;
 
 function renderActivityPicker(){
   plannerView.innerHTML = `
@@ -249,10 +253,6 @@ window.savePlan = async function(){
   plans.push(entry);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
 
-  if(fileHandle){
-    await writeToFile();
-  }
-
   renderActivityPicker();
 };
 
@@ -266,30 +266,6 @@ function exportTxt(){
   a.href = URL.createObjectURL(blob);
   a.download = "valentine-plans.txt";
   a.click();
-}
-
-async function connectTxt(){
-  if(!window.showSaveFilePicker){
-    alert("Use Chrome or Edge for auto-save ✨");
-    return;
-  }
-
-  fileHandle = await showSaveFilePicker({
-    suggestedName: "valentine-plans.txt",
-    types: [{ accept: { "text/plain": [".txt"] } }]
-  });
-
-  await writeToFile();
-  fileStatus.textContent = "Connected 💘";
-}
-
-async function writeToFile(){
-  const writable = await fileHandle.createWritable();
-  const text = plans.map(p =>
-    `${p.date} | ${p.activity} | ${p.note || "(no note)"}`
-  ).join("\n");
-  await writable.write(text);
-  await writable.close();
 }
 
 /***********************

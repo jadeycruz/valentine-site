@@ -26,13 +26,7 @@
 
     <section class="planner hidden" id="planner">
       <h2>Yay! Let’s plan our date 💘</h2>
-
-        <div class="planner-toolbar">
-          <button id="exportTxtBtn" class="btn secondary">Export TXT</button>
-          <button id="connectTxtBtn" class="btn secondary">Connect TXT</button>
-          <span id="fileStatus" class="tiny">Not connected</span>
-        </div>
-
+        
         <!-- JS will render activity picker OR calendar here -->
         <div id="plannerView"></div>
 
@@ -41,6 +35,11 @@
         </div>
 
       <p class="tiny" id="planHint">Tip: pick an activity we can do 😁</p>
+
+      <div class="planner-export">
+        <button id="exportTxtBtn" class="btn secondary">Export plans as text 💌</button>
+      </div>
+
     </section>
 
     <section class="result hidden" id="result">
