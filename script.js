@@ -276,6 +276,7 @@ const ACTIVITIES = [
 const STORAGE_KEY = "valentine_plans";
 let selectedActivity = null;
 let plans = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+let hasSavedPlan = false;
 
 const plannerView = document.getElementById("plannerView");
 const exportTxtBtn = document.getElementById("exportTxtBtn");
@@ -351,6 +352,9 @@ window.savePlan = async function(){
   plans.push(entry);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
 
+  // ✅ IMPORTANT: exit the form view
+  selectedActivity = null;
+
   renderActivityPicker();
   updatePlannerActions();
 };
@@ -381,8 +385,10 @@ function exportTxt(){
 }
 
 function updatePlannerActions(){
-  // Hide "Done planning" when you're inside an activity form
-  if (selectedActivity) {
+  // Hide Done planning if:
+  // - you're inside an activity form
+  // - OR you haven't saved anything yet
+  if (selectedActivity || plans.length === 0) {
     donePlanningBtn.classList.add("hidden");
   } else {
     donePlanningBtn.classList.remove("hidden");
@@ -600,3 +606,5 @@ function loopConfetti() {
 
   if (confettiRunning) rafId = requestAnimationFrame(loopConfetti);
 }
+
+updatePlannerActions();
