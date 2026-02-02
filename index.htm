@@ -27,34 +27,20 @@
     <section class="planner hidden" id="planner">
       <h2>Yay! Let’s plan our date 💘</h2>
 
-      <div class="planner-grid">
-        <label>
-          Date
-          <input type="date" id="dateInput" />
-        </label>
+        <div class="planner-toolbar">
+          <button id="exportTxtBtn" class="btn secondary">Export TXT</button>
+          <button id="connectTxtBtn" class="btn secondary">Connect TXT</button>
+          <span id="fileStatus" class="tiny">Not connected</span>
+        </div>
 
-        <label>
-          Time
-          <input type="time" id="timeInput" />
-        </label>
+        <!-- JS will render activity picker OR calendar here -->
+        <div id="plannerView"></div>
 
-        <label class="full">
-          Restaurant / Activity
-          <input type="text" id="placeInput" placeholder="e.g., ramen + dessert 🍜🍰" />
-        </label>
+        <div class="planner-actions">
+          <button id="cancelPlanBtn" class="btn secondary">Back</button>
+        </div>
 
-        <label class="full">
-          Note (optional)
-          <textarea id="noteInput" rows="3" placeholder="e.g., wear something cute 😳"></textarea>
-        </label>
-      </div>
-
-      <div class="planner-actions">
-        <button id="lockBtn" class="btn yes">Lock it in ✅</button>
-        <button id="cancelPlanBtn" class="btn secondary">Back</button>
-      </div>
-
-      <p class="tiny" id="planHint">Tip: pick a date/time so we can make it official 👀</p>
+      <p class="tiny" id="planHint">Tip: pick an activity we can do 😁</p>
     </section>
 
     <section class="result hidden" id="result">

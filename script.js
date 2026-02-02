@@ -39,10 +39,7 @@ const ctx = confettiCanvas.getContext("2d");
 
 const planner = document.getElementById("planner");
 const dateInput = document.getElementById("dateInput");
-const timeInput = document.getElementById("timeInput");
-const placeInput = document.getElementById("placeInput");
 const noteInput = document.getElementById("noteInput");
-const lockBtn = document.getElementById("lockBtn");
 const cancelPlanBtn = document.getElementById("cancelPlanBtn");
 const planHint = document.getElementById("planHint");
 
@@ -146,65 +143,6 @@ cancelPlanBtn.addEventListener("click", () => {
   hint.classList.remove("hidden");
 });
 
-lockBtn.addEventListener("click", async () => {
-  const date = dateInput.value;
-  const time = timeInput.value;
-  const place = placeInput.value.trim();
-  const note = noteInput.value.trim();
-
-  if (!date || !time || !place) {
-    planHint.textContent = "Fill in date, time, and restaurant/activity 👀";
-    spawnHearts(6);
-    return;
-  }
-
-  planHint.textContent = "Locked in 😤💘";
-
-  // Build a cute summary
-  const summary =
-`Date Plan 💖
-To: ${CONFIG.recipientName}
-
-📅 Date: ${date}
-🕒 Time: ${time}
-📍 Place: ${place}
-💌 Note: ${note || "(none)"}
-`;
-
-  // Show final result screen
-  planner.classList.add("hidden");
-  result.classList.remove("hidden");
-
-  // Customize the final message with the plan
-  resultTitle.textContent = "It’s a date!!! 💞";
-  resultText.textContent = `Okayyy so we’re doing ${place} on ${date} at ${time}. I’m excited 😳`;
-
-  // Confetti party
-  startConfetti();
-  spawnHearts(40);
-
-  // Add a copy button if it doesn't exist yet
-  let copyBtn = document.getElementById("copyPlanBtn");
-  if (!copyBtn) {
-    copyBtn = document.createElement("button");
-    copyBtn.id = "copyPlanBtn";
-    copyBtn.className = "btn secondary";
-    copyBtn.textContent = "Copy plan 📋";
-    result.appendChild(copyBtn);
-
-    copyBtn.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(summary);
-        copyBtn.textContent = "Copied! 💘";
-        setTimeout(() => (copyBtn.textContent = "Copy plan 📋"), 1400);
-      } catch {
-        copyBtn.textContent = "Copy failed 😭";
-        setTimeout(() => (copyBtn.textContent = "Copy plan 📋"), 1400);
-      }
-    });
-  }
-});
-
 restartBtn.addEventListener("click", () => {
   // Reset everything
   noCount = 0;
@@ -225,10 +163,134 @@ restartBtn.addEventListener("click", () => {
   timeInput.value = "";
   placeInput.value = "";
   noteInput.value = "";
-  planHint.textContent = "Tip: pick a date/time so we can make it official 👀";
+  planHint.textContent = "Tip: pick an activity we can do 😁";
 
   stopConfetti();
 });
+
+/***********************
+ * Planner: Activities
+ ***********************/
+const ACTIVITIES = [
+  { id: "dinner", name: "Dinner Date", img: "dinner.gif" },
+  { id: "movie", name: "Movie Night", img: "movie.gif" },
+  { id: "skating", name: "Ice Skating", img: "skating.gif" },
+  { id: "chilling", name: "Just Chill", img: "chilling.gif" },
+];
+
+const STORAGE_KEY = "valentine_plans";
+let selectedActivity = null;
+let plans = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+let fileHandle = null;
+
+const plannerView = document.getElementById("plannerView");
+const exportTxtBtn = document.getElementById("exportTxtBtn");
+const connectTxtBtn = document.getElementById("connectTxtBtn");
+const fileStatus = document.getElementById("fileStatus");
+
+renderActivityPicker();
+
+exportTxtBtn.onclick = exportTxt;
+connectTxtBtn.onclick = connectTxt;
+
+function renderActivityPicker(){
+  plannerView.innerHTML = `
+    <p class="tiny">Choose an activity:</p>
+    <div class="activity-grid">
+      ${ACTIVITIES.map(a => `
+        <button class="activity-btn" onclick="selectActivity('${a.id}')">
+          <img src="${a.img}" />
+          ${a.name}
+        </button>
+      `).join("")}
+    </div>
+
+    <div class="saved-list">
+      <strong>Saved plans:</strong>
+      ${plans.map(p => `<div>• ${p.date} — ${p.activity}</div>`).join("") || "None yet"}
+    </div>
+  `;
+}
+
+window.selectActivity = function(id){
+  selectedActivity = ACTIVITIES.find(a => a.id === id);
+  plannerView.innerHTML = `
+    <div class="planner-form">
+      <label>
+        Date
+        <input type="date" id="planDate" />
+      </label>
+
+      <label>
+        Note
+        <textarea id="planNote" rows="3"></textarea>
+      </label>
+
+      <button class="btn yes" onclick="savePlan()">Save 💘</button>
+    </div>
+  `;
+};
+
+window.savePlan = async function(){
+  const date = document.getElementById("planDate").value;
+  const note = document.getElementById("planNote").value.trim();
+
+  if(!date){
+    spawnHearts(6);
+    return;
+  }
+
+  const entry = {
+    date,
+    activity: selectedActivity.name,
+    note
+  };
+
+  plans.push(entry);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
+
+  if(fileHandle){
+    await writeToFile();
+  }
+
+  renderActivityPicker();
+};
+
+function exportTxt(){
+  const text = plans.map(p =>
+    `${p.date} | ${p.activity} | ${p.note || "(no note)"}`
+  ).join("\n");
+
+  const blob = new Blob([text], { type: "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "valentine-plans.txt";
+  a.click();
+}
+
+async function connectTxt(){
+  if(!window.showSaveFilePicker){
+    alert("Use Chrome or Edge for auto-save ✨");
+    return;
+  }
+
+  fileHandle = await showSaveFilePicker({
+    suggestedName: "valentine-plans.txt",
+    types: [{ accept: { "text/plain": [".txt"] } }]
+  });
+
+  await writeToFile();
+  fileStatus.textContent = "Connected 💘";
+}
+
+async function writeToFile(){
+  const writable = await fileHandle.createWritable();
+  const text = plans.map(p =>
+    `${p.date} | ${p.activity} | ${p.note || "(no note)"}`
+  ).join("\n");
+  await writable.write(text);
+  await writable.close();
+}
 
 /***********************
  * 5) Floating hearts
