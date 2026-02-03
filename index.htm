@@ -49,7 +49,7 @@
 
       <div class="games-list">
         <button class="btn yes" id="photoGameBtn">Photo Mini Game 📸💞</button>
-        <button class="btn secondary" disabled>Game 2 (coming soon)</button>
+        <button class="btn yes" id="scratchGameBtn">Scratch to Reveal ✨🪙</button>
         <button class="btn secondary" disabled>Game 3 (coming soon)</button>
       </div>
 
@@ -85,6 +85,21 @@
       <p class="tiny" id="gameStatus">0 / 3 photos unlocked</p>
     </section>
     
+    <section class="scratch hidden" id="scratchGame">
+      <h2>Scratch to Reveal ✨🪙</h2>
+      <p class="tiny">Scratch the grey layer to reveal the photo!</p>
+
+      <div class="scratch-area">
+        <img id="scratchImg" class="scratch-photo" src="photos/photo1.jpg" alt="Scratch photo" />
+        <canvas id="scratchCanvas" width="300" height="300"></canvas>
+      </div>
+
+      <div class="scratch-actions">
+        <button class="btn secondary" id="scratchBackBtn">Back</button>
+        <button class="btn yes hidden" id="scratchContinueBtn">Continue 💘</button>
+      </div>
+    </section>
+
     <section class="result hidden" id="result">
       <h2 id="resultTitle">YAYYYYY!!! 💘 Let's plan some stuff together.</h2>  
       <p id="resultText">You made the right choice young one. Hehe!</p>

@@ -296,7 +296,7 @@ h1{
   justify-content: center;
 }
 
-/* ========== Photo mini game ========== */
+/* ========== Photo Mini game ========== */
 .game-area {
   position: relative;
   border-radius: 18px;
@@ -364,4 +364,32 @@ h1{
   font-weight: 800;
   background: rgba(255, 255, 255, 0.85);
   border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* ========== Scratch to Reveal Game ========== */
+.scratch-area {
+  position: relative;
+  width: 300px;
+  margin: 16px auto;
+}
+
+.scratch-photo {
+  width: 100%;
+  border-radius: 16px;
+  display: block;
+}
+
+#scratchCanvas {
+  position: absolute;
+  inset: 0;
+  background: #cfcfcf;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.scratch-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
 }

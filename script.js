@@ -62,6 +62,13 @@ const el = {
   gamesBackBtn: $('#gamesBackBtn'),
   gamesContinueBtn: $('#gamesContinueBtn'),
 
+  // scratch game
+  scratchGameBtn: $('#scratchGameBtn'),
+  scratchGame: $('#scratchGame'),
+  scratchCanvas: $('#scratchCanvas'),
+  scratchContinueBtn: $('#scratchContinueBtn'),
+  scratchBackBtn: $('#scratchBackBtn'),
+
   // photo game
   gameArea: $('#gameArea'),
   gameOverlay: $('#gameOverlay'),
@@ -404,9 +411,10 @@ el.gamesBackBtn.addEventListener('click', () => {
  * 7) Games menu + flow
  ***********************/
 let photoGameCompleted = false;
+let scratchGameCompleted = false;
 
 function updateGamesContinue() {
-  if (photoGameCompleted) {
+  if (photoGameCompleted && scratchGameCompleted) {
     el.gamesContinueBtn.classList.remove('hidden');
     el.gamesContinueBtn.disabled = false;
     el.gamesContinueBtn.textContent = 'Continue 💘';
@@ -425,6 +433,12 @@ el.photoGameBtn.addEventListener('click', () => {
   updateGamesContinue();
 
   initPhotoGame();
+});
+
+el.scratchGameBtn.addEventListener('click', () => {
+  el.gamesMenu.classList.add('hidden');
+  el.scratchGame.classList.remove('hidden');
+  initScratchGame();
 });
 
 el.gamesContinueBtn.addEventListener('click', () => {
@@ -581,6 +595,67 @@ el.nextPhotoBtn.addEventListener('click', () => {
   currentPhotoIndex = unlockedCount;
   lockPhoto();
   spawnHearts(8);
+});
+
+/***********************
+ * 8.5) Scratch to Reveal Game
+ ***********************/
+function initScratchGame() {
+  const canvas = el.scratchCanvas;
+  const ctx = canvas.getContext('2d');
+
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = '#bdbdbd';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalCompositeOperation = 'destination-out';
+
+  let scratching = false;
+
+  canvas.onmousedown = () => scratching = true;
+  canvas.onmouseup = () => scratching = false;
+  canvas.onmouseleave = () => scratching = false;
+
+  canvas.onmousemove = (e) => {
+    if (!scratching) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    ctx.beginPath();
+    ctx.arc(x, y, 22, 0, Math.PI * 2);
+    ctx.fill();
+
+    checkScratchProgress(ctx);
+  };
+}
+
+function checkScratchProgress(ctx) {
+  const img = ctx.getImageData(0, 0, el.scratchCanvas.width, el.scratchCanvas.height);
+  let cleared = 0;
+
+  for (let i = 3; i < img.data.length; i += 4) {
+    if (img.data[i] === 0) cleared++;
+  }
+
+  const percent = cleared / (el.scratchCanvas.width * el.scratchCanvas.height);
+
+  if (percent > 0.55 && !scratchGameCompleted) {
+    scratchGameCompleted = true;
+    el.scratchContinueBtn.classList.remove('hidden');
+    spawnHearts(16);
+    updateGamesContinue();
+  }
+}
+
+el.scratchBackBtn.addEventListener('click', () => {
+  el.scratchGame.classList.add('hidden');
+  el.gamesMenu.classList.remove('hidden');
+});
+
+el.scratchContinueBtn.addEventListener('click', () => {
+  el.scratchGame.classList.add('hidden');
+  el.gamesMenu.classList.remove('hidden');
 });
 
 /***********************
