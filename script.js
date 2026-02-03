@@ -81,7 +81,8 @@ const el = {
   carouselBadge: $('#carouselBadge'),
   nextPhotoBtn: $('#nextPhotoBtn'),
   continueBtn: $('#continueBtn'),
-  backToPlanBtn: $('#backToPlanBtn'),
+  backToPlannerBtn: $('#backToPlannerBtn'),
+  backToGamesBtn: $('#backToGamesBtn'),
 
   // confetti
   confettiCanvas: $('#confetti'),
@@ -446,9 +447,30 @@ el.gamesContinueBtn.addEventListener('click', () => {
   el.result.classList.remove('hidden');
 });
 
-el.backToPlanBtn.addEventListener('click', () => {
+// Back to planner
+el.backToPlannerBtn.addEventListener('click', () => {
+  el.carousel.classList.add('hidden');
+  el.planner.classList.remove('hidden');
+
+  // ensure YES/NO never come back
+  el.btnRow.classList.add('hidden');
+  el.hint.classList.add('hidden');
+
+  // show activity picker
+  selectedActivity = null;
+  renderActivityPicker();
+  updatePlannerActions();
+});
+
+// Back to games list
+el.backToGamesBtn.addEventListener('click', () => {
   el.carousel.classList.add('hidden');
   el.gamesMenu.classList.remove('hidden');
+
+  // ensure YES/NO never come back
+  el.btnRow.classList.add('hidden');
+  el.hint.classList.add('hidden');
+
   updateGamesContinue();
 });
 
