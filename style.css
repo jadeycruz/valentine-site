@@ -14,6 +14,7 @@
 
 /* ========== Base layout ========== */
 *{ box-sizing: border-box; }
+
 body{
   margin: 0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -27,6 +28,8 @@ body{
               radial-gradient(circle at 80% 40%, var(--bg2), transparent 55%),
               linear-gradient(135deg, #fff 0%, #ffe6f0 35%, #ffd6e7 100%);
 }
+
+.hidden { display: none; }
 
 .card{
   width: min(520px, 92vw);
@@ -58,6 +61,13 @@ h1{
   opacity: 0.85;
 }
 
+.hint{
+  margin: 14px 0 0;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+/* ========== Buttons ========== */
 .btn-row{
   display: flex;
   gap: 12px;
@@ -97,11 +107,60 @@ h1{
   color: #333;
 }
 
-.hint{
-  margin: 14px 0 0;
-  font-size: 13px;
+/* Mobile tweaks */
+@media (max-width: 420px){
+  .btn{ font-size: 16px; padding: 12px 18px; }
+}
+
+/* Fullscreen overlay that sits on top of everything */
+#yesOverlay{
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+}
+
+/* Make the YES button truly fill the overlay */
+#yesOverlay .btn{
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  margin: 0;
+  transform: none !important;
+  font-size: clamp(32px, 8vw, 72px);
+}
+
+/* ========== Panels ========== */
+.result,
+.planner,
+.carousel,
+.games {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+}
+
+.planner { text-align: left; }
+.planner h2 { margin: 0 0 12px; text-align: center; }
+
+.planner-actions,
+.carousel-actions,
+.games-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.tiny {
+  text-align: center;
+  margin: 10px 0 0;
+  font-size: 12px;
   opacity: 0.75;
 }
+
 
 /* YES button goes fullscreen after enough "No" clicks */
 .yes-fullscreen {
@@ -132,97 +191,6 @@ h1{
   padding: 0 !important;
 }
 
-/* Fullscreen overlay that sits on top of everything */
-#yesOverlay{
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  display: flex;
-}
-
-/* Make the YES button truly fill the overlay */
-#yesOverlay .btn{
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
-  margin: 0;
-  transform: none !important;
-  font-size: clamp(32px, 8vw, 72px);
-}
-
-/* Result panel */
-.result{
-  margin-top: 18px;
-  padding: 16px;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.7);
-  border: 1px solid rgba(255,255,255,0.75);
-}
-.hidden{ display: none; }
-
-/* Planner panel */
-.planner{
-  margin-top: 18px;
-  padding: 16px;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.7);
-  border: 1px solid rgba(255,255,255,0.75);
-  text-align: left;
-}
-
-.planner h2{
-  margin: 0 0 12px;
-  text-align: center;
-}
-
-.planner-grid{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.planner-grid label{
-  display: grid;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  opacity: 0.9;
-}
-
-.planner-grid input,
-.planner-grid textarea{
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.12);
-  outline: none;
-  font-size: 14px;
-  background: rgba(255,255,255,0.85);
-}
-
-.planner-grid .full{
-  grid-column: 1 / -1;
-}
-
-.planner-actions{
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 12px;
-}
-
-.tiny{
-  text-align: center;
-  margin: 10px 0 0;
-  font-size: 12px;
-  opacity: 0.75;
-}
-
-@media (max-width: 420px){
-  .planner-grid{ grid-template-columns: 1fr; }
-}
-
-
 /* ========== Floating hearts ========== */
 #hearts-layer{
   position: fixed;
@@ -251,46 +219,23 @@ h1{
   border-radius: 50%;
 }
 
-.heart{
-  background: currentColor;
-}
-
-.heart::before{
-  left: -7px;
-  top: 0;
-}
-.heart::after{
-  left: 0;
-  top: -7px;
-}
+.heart { background: currentColor; }
+.heart::before { left: -7px; top: 0; }
+.heart::after { left: 0; top: -7px; }
 
 @keyframes floatUp{
   from { transform: translateY(20vh) rotate(45deg); }
   to   { transform: translateY(-120vh) rotate(45deg); }
 }
 
-/* Confetti canvas */
+/* ========== Confetti Canvas ========== */
 #confetti{
   position: fixed;
   inset: 0;
   pointer-events: none;
 }
 
-/* Mobile tweaks */
-@media (max-width: 420px){
-  .btn{ font-size: 16px; padding: 12px 18px; }
-}
-
-/* ===== Activity Planner Upgrade ===== */
-.planner-toolbar{
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-}
-
+/* ===== Activity Planner ===== */
 .activity-grid{
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -326,133 +271,34 @@ h1{
   font-size: 13px;
 }
 
-.planner-export{
-  margin-top: 14px;
+.saved-list__head {
   display: flex;
-  justify-content: center;
-}
-
-/* ===== Photo Carousel ===== */
-.carousel{
-  margin-top: 18px;
-  padding: 16px;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.7);
-  border: 1px solid rgba(255,255,255,0.75);
-  text-align: center;
-}
-
-.carousel-title{
-  margin: 0 0 12px;
-}
-
-.carousel-frame{
-  display: grid;
-  grid-template-columns: 40px 1fr 40px;
-  gap: 10px;
+  justify-content: space-between;
   align-items: center;
-}
-
-.carousel-image-wrap{
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.08);
-  background: rgba(255,255,255,0.75);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.10);
-}
-
-.carousel-image-wrap img{
-  width: 100%;
-  height: min(320px, 52vw);
-  object-fit: cover;
-  display: block;
-}
-
-.carousel-badge{
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 800;
-  background: rgba(255,255,255,0.85);
-  border: 1px solid rgba(0,0,0,0.08);
-}
-
-.carousel-btn{
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  font-size: 22px;
-  font-weight: 900;
-  cursor: pointer;
-  background: rgba(255,255,255,0.85);
-  border: 1px solid rgba(0,0,0,0.08);
-  box-shadow: 0 10px 18px rgba(0,0,0,0.10);
-  transition: transform 160ms ease;
-}
-
-.carousel-btn:active{
-  transform: scale(0.96);
-}
-
-.carousel-dots{
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 12px;
-  flex-wrap: wrap;
-}
-
-.dot{
-  width: 9px;
-  height: 9px;
-  border-radius: 999px;
-  border: 1px solid rgba(0,0,0,0.18);
-  background: rgba(0,0,0,0.12);
-  cursor: pointer;
-}
-
-.dot.active{
-  background: rgba(255,77,109,0.9);
-  border-color: rgba(255,77,109,0.9);
-}
-
-.carousel-actions{
-  display: flex;
   gap: 10px;
-  justify-content: center;
+}
+
+.planner-export {
   margin-top: 14px;
+  display: flex;
+  justify-content: center;
 }
 
-@media (max-width: 420px){
-  .carousel-frame{
-    grid-template-columns: 34px 1fr 34px;
-  }
-  .carousel-btn{
-    width: 34px;
-    height: 34px;
-    font-size: 20px;
-  }
-}
-
-.game-area{
+/* ========== Photo mini game ========== */
+.game-area {
   position: relative;
   border-radius: 18px;
   overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.08);
-  background: rgba(255,255,255,0.75);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.10);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.10);
   width: 100%;
   height: min(340px, 56vw);
   margin-top: 12px;
   cursor: crosshair;
 }
 
-.game-photo{
+.game-photo {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -460,61 +306,50 @@ h1{
   transform: scale(1.02);
 }
 
-.game-overlay{
+.game-overlay {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
   gap: 8px;
-  background: rgba(255,255,255,0.35);
+  background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(10px);
 }
 
-.lock-text{
+.lock-text {
   font-weight: 900;
   font-size: 20px;
 }
 
-.hint-text{
+.hint-text {
   font-size: 13px;
   opacity: 0.9;
   font-weight: 700;
 }
 
-.ping{
+.ping {
   position: absolute;
   width: 16px;
   height: 16px;
   border-radius: 999px;
-  border: 2px solid rgba(255,77,109,0.9);
+  border: 2px solid rgba(255, 77, 109, 0.9);
   transform: translate(-50%, -50%);
   animation: ping 0.55s ease-out forwards;
 }
 
-@keyframes ping{
+@keyframes ping {
   from { opacity: 1; transform: translate(-50%, -50%) scale(0.6); }
   to   { opacity: 0; transform: translate(-50%, -50%) scale(2.6); }
 }
 
-/* ===== Games Menu ===== */
-.games{
-  margin-top: 18px;
-  padding: 16px;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.7);
-  border: 1px solid rgba(255,255,255,0.75);
-  text-align: center;
-}
-
-.games-list{
-  display: grid;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.games-actions{
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 14px;
+.carousel-badge {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }

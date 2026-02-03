@@ -1,3 +1,5 @@
+'use strict';
+
 console.log("script.js is running ✅");
 
 /***********************
@@ -22,98 +24,110 @@ const CAROUSEL_PHOTOS = [
 ];
 
 /***********************
- * 2) Grab elements
+ * 2) Helpers + elements
  ***********************/
-const toLine = document.getElementById("toLine");
-const mainMessage = document.getElementById("mainMessage");
-const subMessage = document.getElementById("subMessage");
+const $ = (sel, root = document) => root.querySelector(sel);
 
-const yesBtn = document.getElementById("yesBtn");
-const noBtn = document.getElementById("noBtn");
+const el = {
+  toLine: $('#toLine'),
+  mainMessage: $('#mainMessage'),
+  subMessage: $('#subMessage'),
+  yesBtn: $('#yesBtn'),
+  noBtn: $('#noBtn'),
+  hint: $('#hint'),
 
-const result = document.getElementById("result");
-const resultTitle = document.getElementById("resultTitle");
-const resultText = document.getElementById("resultText");
-const restartBtn = document.getElementById("restartBtn");
-const hint = document.getElementById("hint");
+  btnRow: $('#btnRow'),
+  heartsLayer: $('#hearts-layer'),
+  bgMusic: $('#bgMusic'),
 
-const btnRow = document.getElementById("btnRow");
-const heartsLayer = document.getElementById("hearts-layer");
-const bgMusic = document.getElementById("bgMusic");
+  // sections
+  planner: $('#planner'),
+  gamesMenu: $('#gamesMenu'),
+  carousel: $('#carousel'),
+  result: $('#result'),
 
-const confettiCanvas = document.getElementById("confetti");
-const ctx = confettiCanvas.getContext("2d");
+  // planner
+  plannerView: $('#plannerView'),
+  cancelPlanBtn: $('#cancelPlanBtn'),
+  donePlanningBtn: $('#donePlanningBtn'),
+  exportTxtBtn: $('#exportTxtBtn'),
 
-const planner = document.getElementById("planner");
-const cancelPlanBtn = document.getElementById("cancelPlanBtn");
-const planHint = document.getElementById("planHint");
-const donePlanningBtn = document.getElementById("donePlanningBtn");
+  // result
+  resultTitle: $('#resultTitle'),
+  resultText: $('#resultText'),
+  restartBtn: $('#restartBtn'),
 
-const carousel = document.getElementById("carousel");
-const carouselImg = document.getElementById("carouselImg");
-const carouselBadge = document.getElementById("carouselBadge");
-const continueBtn = document.getElementById("continueBtn");
-const backToPlanBtn = document.getElementById("backToPlanBtn");
+  // games
+  photoGameBtn: $('#photoGameBtn'),
+  gamesBackBtn: $('#gamesBackBtn'),
+  gamesContinueBtn: $('#gamesContinueBtn'),
 
-const gameArea = document.getElementById("gameArea");
-const gameOverlay = document.getElementById("gameOverlay");
-const lockText = document.getElementById("lockText");
-const hintText = document.getElementById("hintText");
-const gamePrompt = document.getElementById("gamePrompt");
-const gameStatus = document.getElementById("gameStatus");
-const ping = document.getElementById("ping");
-const nextPhotoBtn = document.getElementById("nextPhotoBtn");
+  // photo game
+  gameArea: $('#gameArea'),
+  gameOverlay: $('#gameOverlay'),
+  lockText: $('#lockText'),
+  hintText: $('#hintText'),
+  gamePrompt: $('#gamePrompt'),
+  gameStatus: $('#gameStatus'),
+  ping: $('#ping'),
+  carouselImg: $('#carouselImg'),
+  carouselBadge: $('#carouselBadge'),
+  nextPhotoBtn: $('#nextPhotoBtn'),
+  continueBtn: $('#continueBtn'),
+  backToPlanBtn: $('#backToPlanBtn'),
 
-const gamesMenu = document.getElementById("gamesMenu");
-const photoGameBtn = document.getElementById("photoGameBtn");
-const gamesBackBtn = document.getElementById("gamesBackBtn");
-const gamesContinueBtn = document.getElementById("gamesContinueBtn");
+  // confetti
+  confettiCanvas: $('#confetti'),
+};
+
+const ctx = el.confettiCanvas.getContext('2d');
+
 /***********************
  * 3) Initialize text
  ***********************/
-toLine.textContent = `${CONFIG.toLine}${CONFIG.recipientName} 💌`;
-mainMessage.textContent = CONFIG.mainMessage;
-subMessage.textContent = CONFIG.subMessage;
-yesBtn.textContent = CONFIG.yesButtonText;
-noBtn.textContent = CONFIG.noButtonText;
+el.toLine.textContent = `${CONFIG.toLine}${CONFIG.recipientName} 💌`;
+el.mainMessage.textContent = CONFIG.mainMessage;
+el.subMessage.textContent = CONFIG.subMessage;
 
-resultTitle.textContent = CONFIG.yesResultTitle;
-resultText.textContent = CONFIG.yesResultText;
+el.yesBtn.textContent = CONFIG.yesButtonText;
+el.noBtn.textContent = CONFIG.noButtonText;
+
+el.resultTitle.textContent = CONFIG.yesResultTitle;
+el.resultText.textContent = CONFIG.yesResultText;
 
 /***********************
- * 4) Button behaviors
+ * 4) Audio
+ ***********************/
+function playMusicSafely() {
+  if (!el.bgMusic) return;
+  el.bgMusic.volume = 0.35;
+  el.bgMusic.play().catch(() => {});
+}
+
+/***********************
+ * 5) YES/NO button behavior
  ***********************/
 let noCount = 0;
 let yesScale = 1;
 
-function playMusicSafely() {
-  // Browsers require user interaction for audio autoplay
-  if (!bgMusic) return;
-  bgMusic.volume = 0.35;
-  bgMusic.play().catch(() => {
-    // If no file or blocked, just ignore silently
-  });
-}
-
 function moveNoButtonAway() {
-  const rowRect = btnRow.getBoundingClientRect();
-  const btnRect = noBtn.getBoundingClientRect();
+  const rowRect = el.btnRow.getBoundingClientRect();
+  const btnRect = el.noBtn.getBoundingClientRect();
 
-  // Allow the No button to move within the button row area
   const maxX = rowRect.width - btnRect.width;
   const maxY = rowRect.height - btnRect.height;
 
-  const x = Math.random() * maxX;
-  const y = Math.random() * maxY;
+  const x = Math.random() * Math.max(0, maxX);
+  const y = Math.random() * Math.max(0, maxY);
 
-  noBtn.style.position = "absolute";
-  noBtn.style.left = `${x}px`;
-  noBtn.style.top = `${y}px`;
+  el.noBtn.style.position = 'absolute';
+  el.noBtn.style.left = `${x}px`;
+  el.noBtn.style.top = `${y}px`;
 }
 
 function growYesButton() {
   yesScale = Math.min(yesScale + 0.12, 2.2);
-  yesBtn.style.transform = `scale(${yesScale})`;
+  el.yesBtn.style.transform = `scale(${yesScale})`;
 }
 
 const FULLSCREEN_AFTER_NO_CLICKS = 10; // change this number if you want
@@ -121,23 +135,20 @@ const FULLSCREEN_AFTER_NO_CLICKS = 10; // change this number if you want
 let yesOverlayEl = null;
 
 function makeYesFullscreen() {
-  // Create overlay once
   if (!yesOverlayEl) {
-    yesOverlayEl = document.createElement("div");
-    yesOverlayEl.id = "yesOverlay";
+    yesOverlayEl = document.createElement('div');
+    yesOverlayEl.id = 'yesOverlay';
     document.body.appendChild(yesOverlayEl);
   }
+  yesOverlayEl.appendChild(el.yesBtn);
 
-  // Move YES button into the overlay (this avoids any parent positioning/filter issues)
-  yesOverlayEl.appendChild(yesBtn);
-
-  // Hard reset inline styles (in case scaling happened before)
-  yesBtn.style.position = "static";
-  yesBtn.style.left = "";
-  yesBtn.style.top = "";
-  yesBtn.style.right = "";
-  yesBtn.style.bottom = "";
-  yesBtn.style.transform = "none";
+  // reset inline styles
+  el.yesBtn.style.position = 'static';
+  el.yesBtn.style.left = '';
+  el.yesBtn.style.top = '';
+  el.yesBtn.style.right = '';
+  el.yesBtn.style.bottom = '';
+  el.yesBtn.style.transform = 'none';
 }
 
 const noPhrases = [
@@ -152,143 +163,56 @@ const noPhrases = [
   "You know... you can just click YES and this would be over.",
 ];
 
-noBtn.addEventListener("click", () => {
+el.noBtn.addEventListener('click', () => {
   playMusicSafely();
-
   noCount++;
 
-  // Once we hit fullscreen, don't keep scaling/moving stuff
   if (noCount >= FULLSCREEN_AFTER_NO_CLICKS) {
     makeYesFullscreen();
-
-    // still do the fun text + hearts if you want
-    const phrase = noPhrases[Math.min(noCount - 1, noPhrases.length - 1)];
-    hint.textContent = phrase;
+    el.hint.textContent = noPhrases[Math.min(noCount - 1, noPhrases.length - 1)];
     spawnHearts(6 + noCount * 2);
-
-    return; // IMPORTANT: prevents growYesButton() from running
+    return; // prevents growYesButton() / moveNoButtonAway()
   }
 
   growYesButton();
   moveNoButtonAway();
 
-  const phrase = noPhrases[Math.min(noCount - 1, noPhrases.length - 1)];
-  hint.textContent = phrase;
-
+  el.hint.textContent = noPhrases[Math.min(noCount - 1, noPhrases.length - 1)];
   spawnHearts(6 + noCount * 2);
 });
 
 // Bonus: make it harder by also moving when hovered (desktop)
-noBtn.addEventListener("mouseenter", () => {
+el.noBtn.addEventListener('mouseenter', () => {
   if (noCount >= 3) moveNoButtonAway();
 });
 
-yesBtn.addEventListener("click", () => {
+el.yesBtn.addEventListener('click', () => {
   playMusicSafely();
 
-  // ✅ If YES is currently fullscreen, remove overlay so planner is clickable/visible
+  // If YES is fullscreen, remove overlay so planner is clickable/visible
   if (yesOverlayEl) {
-    // put YES back into original row (optional but keeps layout clean)
-    btnRow.insertBefore(yesBtn, btnRow.firstChild);
-
+    el.btnRow.insertBefore(el.yesBtn, el.btnRow.firstChild);
     yesOverlayEl.remove();
     yesOverlayEl = null;
   }
 
-  hasSavedPlan = false;
-
   // Hide the buttons and open planner instead of final result
-  btnRow.classList.add("hidden");
-  hint.classList.add("hidden");
-  planner.classList.remove("hidden");
+  el.btnRow.classList.add('hidden');
+  el.hint.classList.add('hidden');
+  el.planner.classList.remove('hidden');
 
   // Confetti + hearts party
   startConfetti();
   spawnHearts(18);
-});
 
-cancelPlanBtn.addEventListener("click", () => {
-  // If user is inside an activity, go back to activity picker
-  if (selectedActivity) {
-    selectedActivity = null;
-    updatePlannerActions();
-    renderActivityPicker();
-    return;
-  }
-
-  // Otherwise, exit planner entirely (back to start)
-  planner.classList.add("hidden");
-  btnRow.classList.remove("hidden");
-  hint.classList.remove("hidden");
-});
-
-restartBtn.addEventListener("click", () => {
-  // Reset everything
-  noCount = 0;
-  yesScale = 1;
-
-  // Put YES button back into the original button row
-  btnRow.insertBefore(yesBtn, btnRow.firstChild);
-
-  // Remove overlay if it exists
-  if (yesOverlayEl) {
-    yesOverlayEl.remove();
-    yesOverlayEl = null;
-  }
-
-  yesBtn.classList.remove("yes-fullscreen");
-  yesBtn.removeAttribute("style"); // wipes leftover inline styles
-  yesBtn.style.transform = "";
-  noBtn.style.position = "relative";
-  noBtn.style.left = "";
-  noBtn.style.top = "";
-
-  hint.textContent = "Tip: Don't you fkn dare press NO.";
-  btnRow.classList.remove("hidden");
-  hint.classList.remove("hidden");
-  result.classList.add("hidden");
-
-  planner.classList.add("hidden");
-  selectedActivity = null;
-  renderActivityPicker();
-  planHint.textContent = "Tip: pick an activity we can do 😁";
-
-  stopConfetti();
-});
-
-donePlanningBtn.addEventListener("click", () => {
-  // You can enforce "must have at least one saved plan" if you want:
-  // if (!plans.length) { planHint.textContent = "Nah you have to hangout with me in order to continue 😡"; return; }
-
-  planner.classList.add("hidden");
-  gamesMenu.classList.remove("hidden");
-
-  updateGamesContinue();
-});
-
-gamesBackBtn.addEventListener("click", () => {
-  gamesMenu.classList.add("hidden");
-  planner.classList.remove("hidden");
-
+  // Planner always starts on activity picker
   selectedActivity = null;
   renderActivityPicker();
   updatePlannerActions();
 });
 
-photoGameBtn.addEventListener("click", () => {
-  gamesMenu.classList.add("hidden");
-  carousel.classList.remove("hidden");
-
-  // reset completion each time you start the game (optional)
-  photoGameCompleted = false;
-  updateGamesContinue();
-
-  // start the photo game
-  initPhotoGame();
-});
-
 /***********************
- * Planner: Activities
+ * 6) Planner (no inline onclicks)
  ***********************/
 const ACTIVITIES = [
   { id: "dinner", name: "Dinner Date", img: "activity/dinner.gif" },
@@ -298,51 +222,51 @@ const ACTIVITIES = [
 ];
 
 const STORAGE_KEY = "valentine_plans";
+let plans = safeLoadPlans();
 let selectedActivity = null;
-let plans = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-let hasSavedPlan = false;
-let photoGameCompleted = false;
 
-const plannerView = document.getElementById("plannerView");
-const exportTxtBtn = document.getElementById("exportTxtBtn");
+function safeLoadPlans() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
 
-renderActivityPicker();
-updatePlannerActions();
+function savePlans() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
+}
 
-exportTxtBtn.onclick = exportTxt;
-
-function renderActivityPicker(){
-  plannerView.innerHTML = `
+function renderActivityPicker() {
+  el.plannerView.innerHTML = `
     <p class="tiny">Choose an activity:</p>
 
     <div class="activity-grid">
-      ${ACTIVITIES.map(a => `
-        <button class="activity-btn" onclick="selectActivity('${a.id}')">
-          <img src="${a.img}" />
+      ${ACTIVITIES.map((a) => `
+        <button class="activity-btn" type="button" data-action="select-activity" data-activity-id="${a.id}">
+          <img src="${a.img}" alt="${a.name}" />
           ${a.name}
         </button>
-      `).join("")}
+      `).join('')}
     </div>
 
     <div class="saved-list">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div class="saved-list__head">
         <strong>Saved plans:</strong>
-        <button class="btn secondary" onclick="clearPlans()">Clear ✖</button>
+        <button class="btn secondary" type="button" data-action="clear-plans">Clear ✖</button>
       </div>
 
       ${
         plans.length
-          ? plans.map(p => `<div>• ${p.date} — ${p.activity}</div>`).join("")
+          ? plans.map((p) => `<div>• ${escapeHtml(p.date)} — ${escapeHtml(p.activity)}</div>`).join('')
           : "<div class='tiny'>None yet</div>"
       }
     </div>
   `;
 }
 
-window.selectActivity = function(id){
-  selectedActivity = ACTIVITIES.find(a => a.id === id);
-  updatePlannerActions();
-  plannerView.innerHTML = `
+function renderPlanForm(activity) {
+  el.plannerView.innerHTML = `
     <div class="planner-form">
       <label>
         Date
@@ -351,93 +275,185 @@ window.selectActivity = function(id){
 
       <label>
         Note
-        <textarea id="planNote" rows="3"></textarea>
+        <textarea id="planNote" rows="3" placeholder="Optional note..."></textarea>
       </label>
 
-      <button class="btn yes" onclick="savePlan()">Save 💘</button>
+      <button class="btn yes" type="button" data-action="save-plan">Save 💘</button>
     </div>
   `;
-};
 
-window.savePlan = async function(){
-  const date = document.getElementById("planDate").value;
-  const note = document.getElementById("planNote").value.trim();
-
-  if(!date){
-    spawnHearts(6);
-    return;
-  }
-
-  const entry = {
-    date,
-    activity: selectedActivity.name,
-    note
-  };
-
-  plans.push(entry);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
-
-  // ✅ IMPORTANT: exit the form view
-  selectedActivity = null;
-
-  renderActivityPicker();
-  updatePlannerActions();
-};
-
-window.clearPlans = function () {
-  const confirmDelete = confirm(
-    "Delete all saved plans? 💔"
-  );
-
-  if (!confirmDelete) return;
-
-  plans = [];
-  localStorage.removeItem(STORAGE_KEY);
-
-  renderActivityPicker();
-};
-
-function exportTxt(){
-  const text = plans.map(p =>
-    `${p.date} | ${p.activity} | ${p.note || "(no note)"}`
-  ).join("\n");
-
-  const blob = new Blob([text], { type: "text/plain" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "valentine-plans.txt";
-  a.click();
+  // focus date input for nice UX
+  const input = $('#planDate');
+  if (input) input.focus();
 }
 
-function updatePlannerActions(){
+function updatePlannerActions() {
   // Hide Done planning if:
   // - you're inside an activity form
   // - OR you haven't saved anything yet
   if (selectedActivity || plans.length === 0) {
-    donePlanningBtn.classList.add("hidden");
+    el.donePlanningBtn.classList.add('hidden');
   } else {
-    donePlanningBtn.classList.remove("hidden");
+    el.donePlanningBtn.classList.remove('hidden');
   }
 }
 
-function updateGamesContinue(){
-  if (photoGameCompleted) {
-    gamesContinueBtn.classList.remove("hidden");
-    gamesContinueBtn.disabled = false;
-    gamesContinueBtn.textContent = "Continue 💘";
-  } else {
-    gamesContinueBtn.classList.add("hidden");
-    gamesContinueBtn.disabled = true;
-  }
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
 }
+
+// Planner event delegation
+el.plannerView.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-action]');
+  if (!btn) return;
+
+  const action = btn.dataset.action;
+
+  if (action === 'select-activity') {
+    const id = btn.dataset.activityId;
+    selectedActivity = ACTIVITIES.find((a) => a.id === id) || null;
+    updatePlannerActions();
+    if (selectedActivity) renderPlanForm(selectedActivity);
+    return;
+  }
+
+  if (action === 'save-plan') {
+    const date = $('#planDate')?.value;
+    const note = ($('#planNote')?.value || '').trim();
+
+    if (!date) {
+      spawnHearts(6);
+      return;
+    }
+
+    plans.push({
+      date,
+      activity: selectedActivity?.name || 'Unknown',
+      note,
+    });
+
+    savePlans();
+
+    // Exit the form view back to picker
+    selectedActivity = null;
+    renderActivityPicker();
+    updatePlannerActions();
+    return;
+  }
+
+  if (action === 'clear-plans') {
+    const confirmDelete = confirm('Delete all saved plans? 💔');
+    if (!confirmDelete) return;
+
+    plans = [];
+    localStorage.removeItem(STORAGE_KEY);
+
+    selectedActivity = null;
+    renderActivityPicker();
+    updatePlannerActions();
+  }
+});
+
+function exportTxt() {
+  const text = plans
+    .map((p) => `${p.date} | ${p.activity} | ${p.note || '(no note)'}`)
+    .join('\n');
+
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'valentine-plans.txt';
+  a.click();
+
+  // cleanup
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+el.exportTxtBtn.addEventListener('click', exportTxt);
+
+el.cancelPlanBtn.addEventListener('click', () => {
+  // If user is inside an activity, go back to activity picker
+  if (selectedActivity) {
+    selectedActivity = null;
+    renderActivityPicker();
+    updatePlannerActions();
+    return;
+  }
+
+  // Otherwise, exit planner entirely (back to start)
+  el.planner.classList.add('hidden');
+  el.btnRow.classList.remove('hidden');
+  el.hint.classList.remove('hidden');
+});
+
+el.donePlanningBtn.addEventListener('click', () => {
+  el.planner.classList.add('hidden');
+  el.gamesMenu.classList.remove('hidden');
+  updateGamesContinue();
+});
+
+el.gamesBackBtn.addEventListener('click', () => {
+  el.gamesMenu.classList.add('hidden');
+  el.planner.classList.remove('hidden');
+
+  selectedActivity = null;
+  renderActivityPicker();
+  updatePlannerActions();
+});
 
 /***********************
- * Photo Carousel
+ * 7) Games menu + flow
  ***********************/
-// For swipe support
-let touchStartX = 0;
-let touchEndX = 0;
+let photoGameCompleted = false;
 
+function updateGamesContinue() {
+  if (photoGameCompleted) {
+    el.gamesContinueBtn.classList.remove('hidden');
+    el.gamesContinueBtn.disabled = false;
+    el.gamesContinueBtn.textContent = 'Continue 💘';
+  } else {
+    el.gamesContinueBtn.classList.add('hidden');
+    el.gamesContinueBtn.disabled = true;
+  }
+}
+
+el.photoGameBtn.addEventListener('click', () => {
+  el.gamesMenu.classList.add('hidden');
+  el.carousel.classList.remove('hidden');
+
+  // reset completion each time you start the game (optional)
+  photoGameCompleted = false;
+  updateGamesContinue();
+
+  initPhotoGame();
+});
+
+el.gamesContinueBtn.addEventListener('click', () => {
+  el.gamesMenu.classList.add('hidden');
+  el.result.classList.remove('hidden');
+});
+
+el.backToPlanBtn.addEventListener('click', () => {
+  el.carousel.classList.add('hidden');
+  el.gamesMenu.classList.remove('hidden');
+  updateGamesContinue();
+});
+
+el.continueBtn.addEventListener('click', () => {
+  el.carousel.classList.add('hidden');
+  el.result.classList.remove('hidden');
+});
+
+/***********************
+ * 8) Photo mini game
+ ***********************/
 let unlockedCount = 0;
 let currentPhotoIndex = 0;
 
@@ -451,25 +467,27 @@ function setNewTarget() {
 }
 
 function updateProgressUI() {
-  carouselBadge.textContent = `${Math.min(unlockedCount + 1, CAROUSEL_PHOTOS.length)} / ${CAROUSEL_PHOTOS.length}`;
-  gameStatus.textContent = `${unlockedCount} / ${CAROUSEL_PHOTOS.length} photos unlocked`;
+  el.carouselBadge.textContent = `${Math.min(unlockedCount + 1, CAROUSEL_PHOTOS.length)} / ${CAROUSEL_PHOTOS.length}`;
+  el.gameStatus.textContent = `${unlockedCount} / ${CAROUSEL_PHOTOS.length} photos unlocked`;
 }
 
 function lockPhoto() {
-  carouselImg.classList.add("hidden");
-  gameOverlay.classList.remove("hidden");
-  nextPhotoBtn.classList.add("hidden");
-  lockText.textContent = "🔒 Locked";
-  hintText.textContent = "Click around to find the heart 💘";
+  el.carouselImg.classList.add('hidden');
+  el.gameOverlay.classList.remove('hidden');
+  el.nextPhotoBtn.classList.add('hidden');
+
+  el.lockText.textContent = '🔒 Locked';
+  el.hintText.textContent = 'Click around to find the heart 💘';
+
   setNewTarget();
   updateProgressUI();
 }
 
 function revealPhoto() {
-  carouselImg.src = CAROUSEL_PHOTOS[currentPhotoIndex];
-  carouselImg.classList.remove("hidden");
-  gameOverlay.classList.add("hidden");
-  nextPhotoBtn.classList.remove("hidden");
+  el.carouselImg.src = CAROUSEL_PHOTOS[currentPhotoIndex];
+  el.carouselImg.classList.remove('hidden');
+  el.gameOverlay.classList.add('hidden');
+  el.nextPhotoBtn.classList.remove('hidden');
   spawnHearts(18);
 }
 
@@ -495,17 +513,16 @@ function showPing(xPx, yPx) {
 function initPhotoGame() {
   unlockedCount = 0;
   currentPhotoIndex = 0;
-  gamePrompt.textContent = "Find the hidden heart to reveal the next photo 👀";
+  el.gamePrompt.textContent = 'Find the hidden heart to reveal the next photo 👀';
 
-  continueBtn.classList.add("hidden"); // ✅ start hidden
-
+  el.continueBtn.classList.add('hidden');
   lockPhoto();
 }
 
-gameArea.addEventListener("click", (e) => {
+el.gameArea.addEventListener('click', (e) => {
   if (unlockedCount >= CAROUSEL_PHOTOS.length) return;
 
-  const rect = gameArea.getBoundingClientRect();
+  const rect = el.gameArea.getBoundingClientRect();
   const x = ((e.clientX - rect.left) / rect.width) * 100;
   const y = ((e.clientY - rect.top) / rect.height) * 100;
 
@@ -516,30 +533,29 @@ gameArea.addEventListener("click", (e) => {
   const dist = Math.sqrt(dx * dx + dy * dy);
 
   if (dist <= HIT_RADIUS) {
-    lockText.textContent = "💖 Found it!";
-    hintText.textContent = "Unlocked 😤";
+    el.lockText.textContent = '💖 Found it!';
+    el.hintText.textContent = 'Unlocked 😤';
     revealPhoto();
   } else {
-    hintText.textContent = distanceHint(dist);
+    el.hintText.textContent = distanceHint(dist);
   }
 });
 
-nextPhotoBtn.addEventListener("click", () => {
+el.nextPhotoBtn.addEventListener('click', () => {
   unlockedCount++;
 
   if (unlockedCount >= CAROUSEL_PHOTOS.length) {
-    nextPhotoBtn.classList.add("hidden");
-    gamePrompt.textContent = "All photos unlocked 🥹💞";
-    lockText.textContent = "✅ Complete";
-    hintText.textContent = "Press Continue 💘";
+    el.nextPhotoBtn.classList.add('hidden');
+    el.gamePrompt.textContent = 'All photos unlocked 🥹💞';
+    el.lockText.textContent = '✅ Complete';
+    el.hintText.textContent = 'Press Continue 💘';
+
     updateProgressUI();
     spawnHearts(12);
 
-    // ✅ mark complete + show continue
     photoGameCompleted = true;
-    continueBtn.classList.remove("hidden");
+    el.continueBtn.classList.remove('hidden');
     updateGamesContinue();
-
     return;
   }
 
@@ -548,35 +564,8 @@ nextPhotoBtn.addEventListener("click", () => {
   spawnHearts(8);
 });
 
-backToPlanBtn.addEventListener("click", () => {
-  // Hide carousel
-  carousel.classList.add("hidden");
-
-  // Show games menu again
-  gamesMenu.classList.remove("hidden");
-
-  // Update Continue button state
-  updateGamesContinue();
-});
-  
-continueBtn.addEventListener("click", () => {
-  // Leave the mini game
-  carousel.classList.add("hidden");
-
-  // Go to next screen (Result for now)
-  result.classList.remove("hidden");
-});
-
-gamesContinueBtn.addEventListener("click", () => {
-  // Leave games menu
-  gamesMenu.classList.add("hidden");
-
-  // Go to next screen (Result for now)
-  result.classList.remove("hidden");
-});
-
 /***********************
- * 5) Floating hearts
+ * 9) Floating hearts
  ***********************/
 function randomHeartColor() {
   const colors = ["#ff4d6d", "#ff7aa2", "#ff2d55", "#ff5ea8", "#ff9bd1"];
@@ -585,8 +574,8 @@ function randomHeartColor() {
 
 function spawnHearts(count = 10) {
   for (let i = 0; i < count; i++) {
-    const heart = document.createElement("div");
-    heart.className = "heart";
+    const heart = document.createElement('div');
+    heart.className = 'heart';
     heart.style.color = randomHeartColor();
 
     const size = 10 + Math.random() * 18;
@@ -594,16 +583,14 @@ function spawnHearts(count = 10) {
     heart.style.height = `${size}px`;
 
     heart.style.left = `${Math.random() * 100}vw`;
-    heart.style.bottom = `-5vh`;
+    heart.style.bottom = '-5vh';
 
     const duration = 3 + Math.random() * 4;
     heart.style.animationDuration = `${duration}s`;
-
     heart.style.opacity = `${0.5 + Math.random() * 0.5}`;
 
-    heartsLayer.appendChild(heart);
+    el.heartsLayer.appendChild(heart);
 
-    // Cleanup
     setTimeout(() => heart.remove(), duration * 1000);
   }
 }
@@ -619,8 +606,8 @@ let confettiRunning = false;
 let rafId = null;
 
 function resizeCanvas() {
-  confettiCanvas.width = window.innerWidth * devicePixelRatio;
-  confettiCanvas.height = window.innerHeight * devicePixelRatio;
+  el.confettiCanvas.width = window.innerWidth * devicePixelRatio;
+  el.confettiCanvas.height = window.innerHeight * devicePixelRatio;
   ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
 }
 
@@ -679,4 +666,41 @@ function loopConfetti() {
   if (confettiRunning) rafId = requestAnimationFrame(loopConfetti);
 }
 
-updatePlannerActions();
+/***********************
+ * 11) Restart
+ ***********************/
+el.restartBtn.addEventListener('click', () => {
+  noCount = 0;
+  yesScale = 1;
+
+  // Put YES button back into the original button row
+  el.btnRow.insertBefore(el.yesBtn, el.btnRow.firstChild);
+
+  // Remove overlay if it exists
+  if (yesOverlayEl) {
+    yesOverlayEl.remove();
+    yesOverlayEl = null;
+  }
+
+  // reset button styles
+  el.yesBtn.removeAttribute('style');
+  el.noBtn.style.position = 'relative';
+  el.noBtn.style.left = '';
+  el.noBtn.style.top = '';
+
+  el.hint.textContent = 'Tip: Don\'t you fkn dare press NO.';
+  el.btnRow.classList.remove('hidden');
+  el.hint.classList.remove('hidden');
+
+  el.result.classList.add('hidden');
+  el.planner.classList.add('hidden');
+  el.gamesMenu.classList.add('hidden');
+  el.carousel.classList.add('hidden');
+
+  selectedActivity = null;
+  plans = safeLoadPlans();
+  renderActivityPicker();
+  updatePlannerActions();
+
+  stopConfetti();
+});
