@@ -622,6 +622,7 @@ setInterval(() => spawnHearts(2), 650);
  ***********************/
 let confettiPieces = [];
 let confettiRunning = false;
+let confettiEmitting = false;
 let rafId = null;
 let confettiStopTimer = null;
 
@@ -643,26 +644,35 @@ function makeConfettiPiece() {
     vy: 2 + Math.random() * 5,
     rot: Math.random() * Math.PI,
     vrot: -0.1 + Math.random() * 0.2,
-    // random bright color
     color: `hsl(${Math.floor(Math.random() * 360)}, 90%, 65%)`,
   };
 }
 
 function startConfetti() {
-  confettiRunning = true;
-  confettiPieces = Array.from({ length: 140 }, makeConfettiPiece);
-  loopConfetti();
+  // start loop if not already running
+  if (!confettiRunning) {
+    confettiRunning = true;
+    loopConfetti();
+  }
 
-  // ✅ auto stop after ~3 seconds (prevents endless confetti)
+  // start emitting new pieces
+  confettiEmitting = true;
+
+  // burst some pieces immediately
+  confettiPieces.push(...Array.from({ length: 90 }, makeConfettiPiece));
+
+  // stop emitting after a bit (but let the current pieces finish falling)
   if (confettiStopTimer) clearTimeout(confettiStopTimer);
   confettiStopTimer = setTimeout(() => {
-    stopConfetti();
+    confettiEmitting = false;
     confettiStopTimer = null;
-  }, 3000);
+  }, 1400); // adjust to taste (1000–2000ms)
 }
 
 function stopConfetti() {
+  // hard stop (used on restart)
   confettiRunning = false;
+  confettiEmitting = false;
   confettiPieces = [];
   if (rafId) cancelAnimationFrame(rafId);
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -671,15 +681,22 @@ function stopConfetti() {
 function loopConfetti() {
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-  for (const p of confettiPieces) {
+  // if still emitting, drip a few new ones per frame (nice “producing” feel)
+  if (confettiEmitting) {
+    confettiPieces.push(...Array.from({ length: 4 }, makeConfettiPiece));
+  }
+
+  // update + draw + remove offscreen pieces
+  for (let i = confettiPieces.length - 1; i >= 0; i--) {
+    const p = confettiPieces[i];
     p.x += p.vx;
     p.y += p.vy;
     p.rot += p.vrot;
 
-    // wrap / reset
-    if (p.y > window.innerHeight + 40) {
-      p.x = Math.random() * window.innerWidth;
-      p.y = -20;
+    // remove once it has fallen off screen
+    if (p.y > window.innerHeight + 60) {
+      confettiPieces.splice(i, 1);
+      continue;
     }
 
     ctx.save();
@@ -690,7 +707,14 @@ function loopConfetti() {
     ctx.restore();
   }
 
-  if (confettiRunning) rafId = requestAnimationFrame(loopConfetti);
+  // if not emitting and nothing left, stop naturally
+  if (!confettiEmitting && confettiPieces.length === 0) {
+    confettiRunning = false;
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    return;
+  }
+
+  rafId = requestAnimationFrame(loopConfetti);
 }
 
 /***********************

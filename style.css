@@ -29,7 +29,7 @@ body{
               linear-gradient(135deg, #fff 0%, #ffe6f0 35%, #ffd6e7 100%);
 }
 
-.hidden { display: none; }
+.hidden { display: none !important; }
 
 .card{
   width: min(520px, 92vw);
