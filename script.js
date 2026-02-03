@@ -379,18 +379,10 @@ function exportTxt() {
 el.exportTxtBtn.addEventListener('click', exportTxt);
 
 el.cancelPlanBtn.addEventListener('click', () => {
-  // If user is inside an activity, go back to activity picker
-  if (selectedActivity) {
-    selectedActivity = null;
-    renderActivityPicker();
-    updatePlannerActions();
-    return;
-  }
-
-  // Otherwise, exit planner entirely (back to start)
-  el.planner.classList.add('hidden');
-  el.btnRow.classList.remove('hidden');
-  el.hint.classList.remove('hidden');
+  // Always go back to activity picker (never return to YES/NO start screen)
+  selectedActivity = null;
+  renderActivityPicker();
+  updatePlannerActions();
 });
 
 el.donePlanningBtn.addEventListener('click', () => {
@@ -487,7 +479,16 @@ function revealPhoto() {
   el.carouselImg.src = CAROUSEL_PHOTOS[currentPhotoIndex];
   el.carouselImg.classList.remove('hidden');
   el.gameOverlay.classList.add('hidden');
-  el.nextPhotoBtn.classList.remove('hidden');
+
+  const isLastPhoto = currentPhotoIndex === CAROUSEL_PHOTOS.length - 1;
+
+  // ✅ Only show Next if there IS a next photo
+  if (isLastPhoto) {
+    el.nextPhotoBtn.classList.add('hidden');
+  } else {
+    el.nextPhotoBtn.classList.remove('hidden');
+  }
+
   spawnHearts(18);
 }
 
@@ -536,6 +537,24 @@ el.gameArea.addEventListener('click', (e) => {
     el.lockText.textContent = '💖 Found it!';
     el.hintText.textContent = 'Unlocked 😤';
     revealPhoto();
+
+    const isLastPhoto = currentPhotoIndex === CAROUSEL_PHOTOS.length - 1;
+
+    // ✅ If this was the LAST photo, finish immediately
+    if (isLastPhoto) {
+      unlockedCount = CAROUSEL_PHOTOS.length;
+
+      el.gamePrompt.textContent = 'All photos unlocked 🥹💞';
+      el.lockText.textContent = '✅ Complete';
+      el.hintText.textContent = 'Press Continue 💘';
+
+      updateProgressUI();
+      spawnHearts(12);
+
+      photoGameCompleted = true;
+      el.continueBtn.classList.remove('hidden');
+      updateGamesContinue();
+    }
   } else {
     el.hintText.textContent = distanceHint(dist);
   }
@@ -604,6 +623,7 @@ setInterval(() => spawnHearts(2), 650);
 let confettiPieces = [];
 let confettiRunning = false;
 let rafId = null;
+let confettiStopTimer = null;
 
 function resizeCanvas() {
   el.confettiCanvas.width = window.innerWidth * devicePixelRatio;
@@ -632,6 +652,13 @@ function startConfetti() {
   confettiRunning = true;
   confettiPieces = Array.from({ length: 140 }, makeConfettiPiece);
   loopConfetti();
+
+  // ✅ auto stop after ~3 seconds (prevents endless confetti)
+  if (confettiStopTimer) clearTimeout(confettiStopTimer);
+  confettiStopTimer = setTimeout(() => {
+    stopConfetti();
+    confettiStopTimer = null;
+  }, 3000);
 }
 
 function stopConfetti() {
