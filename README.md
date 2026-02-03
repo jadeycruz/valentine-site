@@ -22,3 +22,4 @@ _2.3.26_
 - sparkle burst on completion of games
 - Scratch to reveal: maybe random photo instead of fixed one
 - Add completed badge when finished games
+- maybe a visual progress bar

@@ -501,14 +501,14 @@ el.backBtn.addEventListener('click', () => {
 });
 
 /***********************
- * 8) Photo mini game
+ * 8) Photo mini game (clean rewrite)
  ***********************/
-let unlockedCount = 0;
-let currentPhotoIndex = 0;
+let unlockedCount = 0;       // how many photos are unlocked (0..3)
+let currentPhotoIndex = 0;   // which photo we are working on (0..2)
 
 let targetX = 50; // percent
 let targetY = 50; // percent
-const HIT_RADIUS = 10; // percent radius (smaller = harder)
+const HIT_RADIUS = 10; // percent
 
 function setNewTarget() {
   targetX = 15 + Math.random() * 70;
@@ -516,13 +516,16 @@ function setNewTarget() {
 }
 
 function updateProgressUI() {
-  el.carouselBadge.textContent = `${Math.min(unlockedCount + 1, PHOTO_GAME_PHOTOS.length)} / ${PHOTO_GAME_PHOTOS.length}`;
-  el.gameStatus.textContent = `${unlockedCount} / ${PHOTO_GAME_PHOTOS.length} photos unlocked`;
+  // Single source of truth: unlockedCount
+  el.carouselBadge.textContent = `${unlockedCount} / ${CAROUSEL_PHOTOS.length}`;
+  el.gameStatus.textContent = `${unlockedCount} / ${CAROUSEL_PHOTOS.length} photos unlocked`;
 }
 
 function lockPhoto() {
   el.carouselImg.classList.add('hidden');
   el.gameOverlay.classList.remove('hidden');
+
+  // Next photo button is not available while locked
   el.nextPhotoBtn.classList.add('hidden');
 
   el.lockText.textContent = '🔒 Locked';
@@ -533,20 +536,20 @@ function lockPhoto() {
 }
 
 function revealPhoto() {
-  el.carouselImg.src = PHOTO_GAME_PHOTOS[currentPhotoIndex];
+  el.carouselImg.src = CAROUSEL_PHOTOS[currentPhotoIndex];
   el.carouselImg.classList.remove('hidden');
   el.gameOverlay.classList.add('hidden');
 
-  const isLastPhoto = currentPhotoIndex === PHOTO_GAME_PHOTOS.length - 1;
+  const isLastPhoto = currentPhotoIndex === CAROUSEL_PHOTOS.length - 1;
 
-  // ✅ Only show Next if there IS a next photo
+  // Only show Next if there IS a next photo to go to
   if (isLastPhoto) {
     el.nextPhotoBtn.classList.add('hidden');
   } else {
     el.nextPhotoBtn.classList.remove('hidden');
   }
 
-  spawnHearts(18);
+  spawnHearts(14);
 }
 
 function distanceHint(dist) {
@@ -557,27 +560,30 @@ function distanceHint(dist) {
 }
 
 function showPing(xPx, yPx) {
-  ping.classList.remove("hidden");
-  ping.style.left = `${xPx}px`;
-  ping.style.top = `${yPx}px`;
+  el.ping.classList.remove("hidden");
+  el.ping.style.left = `${xPx}px`;
+  el.ping.style.top = `${yPx}px`;
 
-  ping.style.animation = "none";
-  ping.offsetHeight; // reflow
-  ping.style.animation = "";
+  el.ping.style.animation = "none";
+  el.ping.offsetHeight; // reflow
+  el.ping.style.animation = "";
 
-  setTimeout(() => ping.classList.add("hidden"), 600);
+  setTimeout(() => el.ping.classList.add("hidden"), 600);
 }
 
 function initPhotoGame() {
   unlockedCount = 0;
   currentPhotoIndex = 0;
-  el.gamePrompt.textContent = 'Find the hidden heart to reveal the next photo 👀';
 
+  el.gamePrompt.textContent = 'Find the hidden heart to reveal the next photo 👀';
+  updateProgressUI();
   lockPhoto();
 }
 
+// Heart-finding click
 el.gameArea.addEventListener('click', (e) => {
-  if (unlockedCount >= PHOTO_GAME_PHOTOS.length) return;
+  // If fully complete, ignore clicks
+  if (unlockedCount >= CAROUSEL_PHOTOS.length) return;
 
   const rect = el.gameArea.getBoundingClientRect();
   const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -592,51 +598,49 @@ el.gameArea.addEventListener('click', (e) => {
   if (dist <= HIT_RADIUS) {
     el.lockText.textContent = '💖 Found it!';
     el.hintText.textContent = 'Unlocked 😤';
+
+    // ✅ Count the unlock NOW (heart found = unlocked)
+    unlockedCount = Math.min(unlockedCount + 1, CAROUSEL_PHOTOS.length);
+    updateProgressUI();
+
+    // Reveal the photo for the current index
     revealPhoto();
 
-    const isLastPhoto = currentPhotoIndex === CAROUSEL_PHOTOS.length - 1;
-
-    // ✅ If this was the LAST photo, finish immediately
-    if (isLastPhoto) {
-      unlockedCount = PHOTO_GAME_PHOTOS.length;
-
+    // If that was the last photo, finish the game (no Finish button here)
+    if (unlockedCount >= CAROUSEL_PHOTOS.length) {
       el.gamePrompt.textContent = 'All photos unlocked 🥹💞';
       el.lockText.textContent = '✅ Complete';
       el.hintText.textContent = 'Press Back ⬅';
 
-      updateProgressUI();
-      spawnHearts(12);
-
       photoGameCompleted = true;
-
       updateGamesContinue();
+      return;
     }
   } else {
     el.hintText.textContent = distanceHint(dist);
   }
 });
 
+// Next photo = navigation only (no counting)
 el.nextPhotoBtn.addEventListener('click', () => {
-  unlockedCount++;
-
-  if (unlockedCount >= PHOTO_GAME_PHOTOS.length) {
-    el.nextPhotoBtn.classList.add('hidden');
-    el.gamePrompt.textContent = 'All photos unlocked 🥹💞';
-    el.lockText.textContent = '✅ Complete';
-    el.hintText.textContent = 'Press Back ⬅';
-
-    updateProgressUI();
-    spawnHearts(12);
-
-    photoGameCompleted = true;
-
-    updateGamesContinue();
-    return;
-  }
-
+  // Move to the next photo index based on how many are unlocked so far
   currentPhotoIndex = unlockedCount;
+
+  // Lock the next one to be found
   lockPhoto();
   spawnHearts(8);
+});
+
+// Back always returns to Games list
+el.backBtn.addEventListener('click', () => {
+  el.carousel.classList.add('hidden');
+  el.gamesMenu.classList.remove('hidden');
+
+  // Keep YES/NO hidden if you don't want to go back to start via this route
+  el.btnRow.classList.add('hidden');
+  el.hint.classList.add('hidden');
+
+  updateGamesContinue();
 });
 
 /***********************
