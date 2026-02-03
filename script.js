@@ -64,7 +64,10 @@ const gameStatus = document.getElementById("gameStatus");
 const ping = document.getElementById("ping");
 const nextPhotoBtn = document.getElementById("nextPhotoBtn");
 
-
+const gamesMenu = document.getElementById("gamesMenu");
+const photoGameBtn = document.getElementById("photoGameBtn");
+const gamesBackBtn = document.getElementById("gamesBackBtn");
+const gamesContinueBtn = document.getElementById("gamesContinueBtn");
 /***********************
  * 3) Initialize text
  ***********************/
@@ -258,7 +261,27 @@ donePlanningBtn.addEventListener("click", () => {
   // if (!plans.length) { planHint.textContent = "Nah you have to hangout with me in order to continue 😡"; return; }
 
   planner.classList.add("hidden");
+  gamesMenu.classList.remove("hidden");
+
+  updateGamesContinue();
+});
+
+gamesBackBtn.addEventListener("click", () => {
+  gamesMenu.classList.add("hidden");
+  planner.classList.remove("hidden");
+
+  selectedActivity = null;
+  renderActivityPicker();
+  updatePlannerActions();
+});
+
+photoGameBtn.addEventListener("click", () => {
+  gamesMenu.classList.add("hidden");
   carousel.classList.remove("hidden");
+
+  // reset completion each time you start the game (optional)
+  photoGameCompleted = false;
+  updateGamesContinue();
 
   // start the photo game
   initPhotoGame();
@@ -278,6 +301,7 @@ const STORAGE_KEY = "valentine_plans";
 let selectedActivity = null;
 let plans = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
 let hasSavedPlan = false;
+let photoGameCompleted = false;
 
 const plannerView = document.getElementById("plannerView");
 const exportTxtBtn = document.getElementById("exportTxtBtn");
@@ -396,6 +420,17 @@ function updatePlannerActions(){
   }
 }
 
+function updateGamesContinue(){
+  if (photoGameCompleted) {
+    gamesContinueBtn.classList.remove("hidden");
+    gamesContinueBtn.disabled = false;
+    gamesContinueBtn.textContent = "Continue 💘";
+  } else {
+    gamesContinueBtn.classList.add("hidden");
+    gamesContinueBtn.disabled = true;
+  }
+}
+
 /***********************
  * Photo Carousel
  ***********************/
@@ -461,6 +496,9 @@ function initPhotoGame() {
   unlockedCount = 0;
   currentPhotoIndex = 0;
   gamePrompt.textContent = "Find the hidden heart to reveal the next photo 👀";
+
+  continueBtn.classList.add("hidden"); // ✅ start hidden
+
   lockPhoto();
 }
 
@@ -489,19 +527,6 @@ gameArea.addEventListener("click", (e) => {
 nextPhotoBtn.addEventListener("click", () => {
   unlockedCount++;
 
-  backToPlanBtn.addEventListener("click", () => {
-  // Hide carousel, show planner
-  carousel.classList.add("hidden");
-  planner.classList.remove("hidden");
-
-  // Always return to the activity picker
-  selectedActivity = null;
-  renderActivityPicker();
-  updatePlannerActions();
-
-  planHint.textContent = "Tip: pick an activity we can do 😁";
-  });
-
   if (unlockedCount >= CAROUSEL_PHOTOS.length) {
     nextPhotoBtn.classList.add("hidden");
     gamePrompt.textContent = "All photos unlocked 🥹💞";
@@ -509,12 +534,45 @@ nextPhotoBtn.addEventListener("click", () => {
     hintText.textContent = "Press Continue 💘";
     updateProgressUI();
     spawnHearts(12);
+
+    // ✅ mark complete + show continue
+    photoGameCompleted = true;
+    continueBtn.classList.remove("hidden");
+    updateGamesContinue();
+
     return;
   }
 
   currentPhotoIndex = unlockedCount;
   lockPhoto();
   spawnHearts(8);
+});
+
+backToPlanBtn.addEventListener("click", () => {
+  // Hide carousel
+  carousel.classList.add("hidden");
+
+  // Show games menu again
+  gamesMenu.classList.remove("hidden");
+
+  // Update Continue button state
+  updateGamesContinue();
+});
+  
+continueBtn.addEventListener("click", () => {
+  // Leave the mini game
+  carousel.classList.add("hidden");
+
+  // Go to next screen (Result for now)
+  result.classList.remove("hidden");
+});
+
+gamesContinueBtn.addEventListener("click", () => {
+  // Leave games menu
+  gamesMenu.classList.add("hidden");
+
+  // Go to next screen (Result for now)
+  result.classList.remove("hidden");
 });
 
 /***********************

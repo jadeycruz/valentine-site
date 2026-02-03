@@ -31,7 +31,7 @@
         <div id="plannerView"></div>
 
         <div class="planner-actions">
-            <button id="donePlanningBtn" class="btn yes">Done planning ➜ Photos</button>
+            <button id="donePlanningBtn" class="btn yes">Done planning ➡️ Games</button>
             <button id="cancelPlanBtn" class="btn secondary">Back</button>
         </div>
 
@@ -42,6 +42,24 @@
       </div>
 
     </section>
+
+    <section class="games hidden" id="gamesMenu">
+      <h2>Pick a game 🎮</h2>
+      <p class="tiny">More games coming soon… but first, unlock our photos 😤</p>
+
+      <div class="games-list">
+        <button class="btn yes" id="photoGameBtn">Photo Mini Game 📸💞</button>
+        <button class="btn secondary" disabled>Game 2 (coming soon)</button>
+        <button class="btn secondary" disabled>Game 3 (coming soon)</button>
+        -->
+      </div>
+
+      <div class="games-actions">
+        <button class="btn secondary" id="gamesBackBtn">Back</button>
+        <button class="btn yes" id="gamesContinueBtn">Continue 💘</button>
+      </div>
+    </section>
+
 
     <section class="carousel hidden" id="carousel">
       <h2 class="carousel-title">Unlock our photos 💞</h2>
@@ -63,7 +81,7 @@
       <div class="carousel-actions">
         <button class="btn yes hidden" id="nextPhotoBtn">Next photo ➜</button>
         <button class="btn secondary" id="backToPlanBtn">Back</button>
-        <button class="btn yes" id="continueBtn">Continue 💘</button>
+        <button class="btn yes hidden" id="continueBtn">Continue 💘</button>
       </div>
 
       <p class="tiny" id="gameStatus">0 / 3 photos unlocked</p>
