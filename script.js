@@ -192,10 +192,11 @@ yesBtn.addEventListener("click", () => {
     yesOverlayEl = null;
   }
 
+  hasSavedPlan = false;
+
   // Hide the buttons and open planner instead of final result
   btnRow.classList.add("hidden");
   hint.classList.add("hidden");
-
   planner.classList.remove("hidden");
 
   // Confetti + hearts party
@@ -487,6 +488,19 @@ gameArea.addEventListener("click", (e) => {
 
 nextPhotoBtn.addEventListener("click", () => {
   unlockedCount++;
+
+  backToPlanBtn.addEventListener("click", () => {
+  // Hide carousel, show planner
+  carousel.classList.add("hidden");
+  planner.classList.remove("hidden");
+
+  // Always return to the activity picker
+  selectedActivity = null;
+  renderActivityPicker();
+  updatePlannerActions();
+
+  planHint.textContent = "Tip: pick an activity we can do 😁";
+  });
 
   if (unlockedCount >= CAROUSEL_PHOTOS.length) {
     nextPhotoBtn.classList.add("hidden");
