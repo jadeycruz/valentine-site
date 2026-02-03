@@ -418,7 +418,7 @@ function updateGamesContinue() {
   if (photoGameCompleted && scratchGameCompleted) {
     el.gamesContinueBtn.classList.remove('hidden');
     el.gamesContinueBtn.disabled = false;
-    el.gamesContinueBtn.textContent = 'Continue 💘';
+    el.gamesContinueBtn.textContent = 'Finish 💘';
   } else {
     el.gamesContinueBtn.classList.add('hidden');
     el.gamesContinueBtn.disabled = true;
@@ -588,7 +588,10 @@ el.gameArea.addEventListener('click', (e) => {
       spawnHearts(12);
 
       photoGameCompleted = true;
-      el.continueBtn.classList.remove('hidden');
+
+      // Do NOT show Finish/Continue inside photo game
+      el.continueBtn.classList.add('hidden');
+
       updateGamesContinue();
     }
   } else {
@@ -609,7 +612,10 @@ el.nextPhotoBtn.addEventListener('click', () => {
     spawnHearts(12);
 
     photoGameCompleted = true;
-    el.continueBtn.classList.remove('hidden');
+
+    // Do NOT show Finish/Continue inside photo game
+    el.continueBtn.classList.add('hidden');
+
     updateGamesContinue();
     return;
   }
