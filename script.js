@@ -21,7 +21,36 @@ const CAROUSEL_PHOTOS = [
   "photos/photo1.jpg",
   "photos/photo2.jpg",
   "photos/photo3.jpg",
+  "photos/photo4.jpg",
+  "photos/photo5.jpg",
+  "photos/photo6.jpg",
+  "photos/photo7.jpg",
+  "photos/photo8.jpg",
+  "photos/photo9.jpg",
+  "photos/photo10.jpg",
 ];
+
+// ---- Random + no-overlap photo dealing (per session) ----
+const PHOTO_GAME_COUNT = 3; // photo mini game uses 3 photos
+
+let PHOTO_GAME_PHOTOS = []; // photos used in photo mini game
+let SCRATCH_PHOTO = "";     // photo used in scratch game
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function dealSessionPhotos() {
+  const pool = shuffle(CAROUSEL_PHOTOS);
+
+  PHOTO_GAME_PHOTOS = pool.slice(0, PHOTO_GAME_COUNT);
+  SCRATCH_PHOTO = pool[PHOTO_GAME_COUNT] || pool[0];
+}
 
 /***********************
  * 2) Helpers + elements
@@ -406,6 +435,9 @@ el.cancelPlanBtn.addEventListener('click', () => {
 el.donePlanningBtn.addEventListener('click', () => {
   el.planner.classList.add('hidden');
   el.gamesMenu.classList.remove('hidden');
+  
+  dealSessionPhotos(); // 🎲 deal photos once for both games
+
   updateGamesContinue();
 });
 
@@ -484,8 +516,8 @@ function setNewTarget() {
 }
 
 function updateProgressUI() {
-  el.carouselBadge.textContent = `${Math.min(unlockedCount + 1, CAROUSEL_PHOTOS.length)} / ${CAROUSEL_PHOTOS.length}`;
-  el.gameStatus.textContent = `${unlockedCount} / ${CAROUSEL_PHOTOS.length} photos unlocked`;
+  el.carouselBadge.textContent = `${Math.min(unlockedCount + 1, PHOTO_GAME_PHOTOS.length)} / ${PHOTO_GAME_PHOTOS.length}`;
+  el.gameStatus.textContent = `${unlockedCount} / ${PHOTO_GAME_PHOTOS.length} photos unlocked`;
 }
 
 function lockPhoto() {
@@ -501,11 +533,11 @@ function lockPhoto() {
 }
 
 function revealPhoto() {
-  el.carouselImg.src = CAROUSEL_PHOTOS[currentPhotoIndex];
+  el.carouselImg.src = PHOTO_GAME_PHOTOS[currentPhotoIndex];
   el.carouselImg.classList.remove('hidden');
   el.gameOverlay.classList.add('hidden');
 
-  const isLastPhoto = currentPhotoIndex === CAROUSEL_PHOTOS.length - 1;
+  const isLastPhoto = currentPhotoIndex === PHOTO_GAME_PHOTOS.length - 1;
 
   // ✅ Only show Next if there IS a next photo
   if (isLastPhoto) {
@@ -545,7 +577,7 @@ function initPhotoGame() {
 }
 
 el.gameArea.addEventListener('click', (e) => {
-  if (unlockedCount >= CAROUSEL_PHOTOS.length) return;
+  if (unlockedCount >= PHOTO_GAME_PHOTOS.length) return;
 
   const rect = el.gameArea.getBoundingClientRect();
   const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -566,7 +598,7 @@ el.gameArea.addEventListener('click', (e) => {
 
     // ✅ If this was the LAST photo, finish immediately
     if (isLastPhoto) {
-      unlockedCount = CAROUSEL_PHOTOS.length;
+      unlockedCount = PHOTO_GAME_PHOTOS.length;
 
       el.gamePrompt.textContent = 'All photos unlocked 🥹💞';
       el.lockText.textContent = '✅ Complete';
@@ -587,7 +619,7 @@ el.gameArea.addEventListener('click', (e) => {
 el.nextPhotoBtn.addEventListener('click', () => {
   unlockedCount++;
 
-  if (unlockedCount >= CAROUSEL_PHOTOS.length) {
+  if (unlockedCount >= PHOTO_GAME_PHOTOS.length) {
     el.nextPhotoBtn.classList.add('hidden');
     el.gamePrompt.textContent = 'All photos unlocked 🥹💞';
     el.lockText.textContent = '✅ Complete';
