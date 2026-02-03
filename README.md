@@ -14,6 +14,7 @@ _2.3.26_
 
 - Done (2.3.26) ~~Add mini games: Scratch to Reveal~~
 - Add mini games: Memory Match
+
 - Add sparkle cursor trail
 - Sound effects when clicking No button
 - Add touch support (mobile scratching) for Scratch to Reveal

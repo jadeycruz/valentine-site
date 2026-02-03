@@ -80,9 +80,7 @@ const el = {
   carouselImg: $('#carouselImg'),
   carouselBadge: $('#carouselBadge'),
   nextPhotoBtn: $('#nextPhotoBtn'),
-  continueBtn: $('#continueBtn'),
-  backToPlannerBtn: $('#backToPlannerBtn'),
-  backToGamesBtn: $('#backToGamesBtn'),
+  backBtn: $('#backBtn'),
 
   // confetti
   confettiCanvas: $('#confetti'),
@@ -387,10 +385,22 @@ function exportTxt() {
 el.exportTxtBtn.addEventListener('click', exportTxt);
 
 el.cancelPlanBtn.addEventListener('click', () => {
-  // Always go back to activity picker (never return to YES/NO start screen)
-  selectedActivity = null;
-  renderActivityPicker();
-  updatePlannerActions();
+  // If you're inside an activity form, go back to the activity picker
+  if (selectedActivity) {
+    selectedActivity = null;
+    renderActivityPicker();
+    updatePlannerActions();
+    return;
+  }
+
+  // Otherwise you're already on the picker -> go back to YES/NO start screen
+  el.planner.classList.add('hidden');
+  el.gamesMenu.classList.add('hidden');
+  el.carousel.classList.add('hidden');
+  el.result.classList.add('hidden');
+
+  el.btnRow.classList.remove('hidden');
+  el.hint.classList.remove('hidden');
 });
 
 el.donePlanningBtn.addEventListener('click', () => {
@@ -447,36 +457,15 @@ el.gamesContinueBtn.addEventListener('click', () => {
   el.result.classList.remove('hidden');
 });
 
-// Back to planner
-el.backToPlannerBtn.addEventListener('click', () => {
-  el.carousel.classList.add('hidden');
-  el.planner.classList.remove('hidden');
-
-  // ensure YES/NO never come back
-  el.btnRow.classList.add('hidden');
-  el.hint.classList.add('hidden');
-
-  // show activity picker
-  selectedActivity = null;
-  renderActivityPicker();
-  updatePlannerActions();
-});
-
-// Back to games list
-el.backToGamesBtn.addEventListener('click', () => {
+el.backBtn.addEventListener('click', () => {
   el.carousel.classList.add('hidden');
   el.gamesMenu.classList.remove('hidden');
 
-  // ensure YES/NO never come back
+  // make sure YES/NO never reappear
   el.btnRow.classList.add('hidden');
   el.hint.classList.add('hidden');
 
   updateGamesContinue();
-});
-
-el.continueBtn.addEventListener('click', () => {
-  el.carousel.classList.add('hidden');
-  el.result.classList.remove('hidden');
 });
 
 /***********************
@@ -552,7 +541,6 @@ function initPhotoGame() {
   currentPhotoIndex = 0;
   el.gamePrompt.textContent = 'Find the hidden heart to reveal the next photo 👀';
 
-  el.continueBtn.classList.add('hidden');
   lockPhoto();
 }
 
@@ -582,15 +570,12 @@ el.gameArea.addEventListener('click', (e) => {
 
       el.gamePrompt.textContent = 'All photos unlocked 🥹💞';
       el.lockText.textContent = '✅ Complete';
-      el.hintText.textContent = 'Press Continue 💘';
+      el.hintText.textContent = 'Press Back ⬅';
 
       updateProgressUI();
       spawnHearts(12);
 
       photoGameCompleted = true;
-
-      // Do NOT show Finish/Continue inside photo game
-      el.continueBtn.classList.add('hidden');
 
       updateGamesContinue();
     }
@@ -606,15 +591,12 @@ el.nextPhotoBtn.addEventListener('click', () => {
     el.nextPhotoBtn.classList.add('hidden');
     el.gamePrompt.textContent = 'All photos unlocked 🥹💞';
     el.lockText.textContent = '✅ Complete';
-    el.hintText.textContent = 'Press Continue 💘';
+    el.hintText.textContent = 'Press Back ⬅';
 
     updateProgressUI();
     spawnHearts(12);
 
     photoGameCompleted = true;
-
-    // Do NOT show Finish/Continue inside photo game
-    el.continueBtn.classList.add('hidden');
 
     updateGamesContinue();
     return;
