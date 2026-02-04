@@ -22,7 +22,7 @@ _2.3.26_
 - Add touch support (mobile scratching) for Scratch to Reveal
 - Heart-shaped scratch brush
 - sparkle burst on completion of games
-- Scratch to reveal: maybe random photo instead of fixed one
+- Done (2.4.26) ~~Scratch to reveal: maybe random photo instead of fixed one~~
 - Add completed badge when finished games
 - maybe a visual progress bar
 

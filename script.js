@@ -485,6 +485,14 @@ el.donePlanningBtn.addEventListener('click', () => {
   
   dealSessionPhotos(); // 🎲 deal photos once for both games
 
+  // ✅ new photo deal => clear in-progress state for these games
+  sessionStorage.removeItem(SESSION_KEYS.photoUnlocked);
+  sessionStorage.removeItem(SESSION_KEYS.photoIndex);
+  sessionStorage.removeItem(SESSION_KEYS.photoLocked);
+
+  sessionStorage.removeItem(SESSION_KEYS.memoryDeck);
+  sessionStorage.removeItem(SESSION_KEYS.memoryMatchedIds);
+
   updateGamesContinue();
 });
 
@@ -505,14 +513,35 @@ const SESSION_KEYS = {
   photoDone: 'vday_photo_done',
   scratchDone: 'vday_scratch_done',
   memoryDone: 'vday_memory_done',
+
+  // ✅ Photo game in-progress
+  photoUnlocked: 'vday_photo_unlocked',
+  photoIndex: 'vday_photo_index',
+  photoLocked: 'vday_photo_locked',
+
+  // ✅ Memory game in-progress
+  memoryDeck: 'vday_memory_deck',
+  memoryMatchedIds: 'vday_memory_matched_ids',
 };
 
 function loadBool(key) {
   return sessionStorage.getItem(key) === '1';
 }
-
 function saveBool(key, val) {
   sessionStorage.setItem(key, val ? '1' : '0');
+}
+
+// ✅ JSON helpers
+function loadJSON(key, fallback) {
+  try {
+    const raw = sessionStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+function saveJSON(key, val) {
+  sessionStorage.setItem(key, JSON.stringify(val));
 }
 
 let photoGameCompleted = loadBool(SESSION_KEYS.photoDone);
@@ -601,6 +630,7 @@ function lockPhoto() {
 
   setNewTarget();
   updateProgressUI();
+  persistPhotoState();
 }
 
 function revealPhoto() {
@@ -618,6 +648,7 @@ function revealPhoto() {
   }
 
   spawnHearts(14);
+  persistPhotoState();
 }
 
 function distanceHint(dist) {
@@ -642,12 +673,60 @@ function showPing(xPx, yPx) {
 function initPhotoGame() {
   CAROUSEL_PHOTOS = PHOTO_GAME_PHOTOS.slice(); // ✅ use dealt photos
 
-  unlockedCount = 0;
-  currentPhotoIndex = 0;
+  // ✅ If completed, show completed state
+  photoGameCompleted = loadBool(SESSION_KEYS.photoDone);
+  if (photoGameCompleted) {
+    unlockedCount = CAROUSEL_PHOTOS.length;
+    currentPhotoIndex = CAROUSEL_PHOTOS.length - 1;
+
+    el.gamePrompt.textContent = 'All photos unlocked 🥹💞';
+    updateProgressUI();
+
+    // show last photo
+    el.carouselImg.src = CAROUSEL_PHOTOS[currentPhotoIndex];
+    el.carouselImg.classList.remove('hidden');
+    el.gameOverlay.classList.add('hidden');
+    el.nextPhotoBtn.classList.add('hidden');
+
+    el.lockText.textContent = '✅ Complete';
+    el.hintText.textContent = 'Press Back ⬅';
+    updateGamesContinue();
+    return;
+  }
+
+  // ✅ Load in-progress state (if any)
+  unlockedCount = loadJSON(SESSION_KEYS.photoUnlocked, 0);
+  currentPhotoIndex = loadJSON(SESSION_KEYS.photoIndex, 0);
+  const wasLocked = loadJSON(SESSION_KEYS.photoLocked, true);
+
+  // Safety clamps
+  unlockedCount = Math.max(0, Math.min(unlockedCount, CAROUSEL_PHOTOS.length));
+  currentPhotoIndex = Math.max(0, Math.min(currentPhotoIndex, CAROUSEL_PHOTOS.length - 1));
 
   el.gamePrompt.textContent = 'Find the hidden heart to reveal the next photo 👀';
   updateProgressUI();
-  lockPhoto();
+
+  if (wasLocked) {
+    lockPhoto();
+  } else {
+    // reveal current photo
+    el.carouselImg.src = CAROUSEL_PHOTOS[currentPhotoIndex];
+    el.carouselImg.classList.remove('hidden');
+    el.gameOverlay.classList.add('hidden');
+
+    const isLastPhoto = currentPhotoIndex === CAROUSEL_PHOTOS.length - 1;
+    if (isLastPhoto) el.nextPhotoBtn.classList.add('hidden');
+    else el.nextPhotoBtn.classList.remove('hidden');
+  }
+}
+
+function persistPhotoState() {
+  saveJSON(SESSION_KEYS.photoUnlocked, unlockedCount);
+  saveJSON(SESSION_KEYS.photoIndex, currentPhotoIndex);
+
+  // locked = overlay visible
+  const locked = !el.gameOverlay.classList.contains('hidden');
+  saveJSON(SESSION_KEYS.photoLocked, locked);
 }
 
 // Heart-finding click
@@ -672,6 +751,7 @@ el.gameArea.addEventListener('click', (e) => {
     // ✅ Count the unlock NOW (heart found = unlocked)
     unlockedCount = Math.min(unlockedCount + 1, CAROUSEL_PHOTOS.length);
     updateProgressUI();
+    persistPhotoState();
 
     // Reveal the photo for the current index
     revealPhoto();
@@ -696,6 +776,7 @@ el.gameArea.addEventListener('click', (e) => {
 el.nextPhotoBtn.addEventListener('click', () => {
   // Move to the next photo index based on how many are unlocked so far
   currentPhotoIndex = unlockedCount;
+  persistPhotoState();
 
   // Lock the next one to be found
   lockPhoto();
@@ -805,10 +886,33 @@ function resetMemoryGame() {
 
   firstPick = null;
   lockBoard = false;
-  matchesFound = 0;
 
-  memoryDeck = buildMemoryDeck();
+  // ✅ Load or create a persistent deck for the session
+  const savedDeck = loadJSON(SESSION_KEYS.memoryDeck, null);
+  if (savedDeck && Array.isArray(savedDeck) && savedDeck.length === 12) {
+    memoryDeck = savedDeck;
+  } else {
+    memoryDeck = buildMemoryDeck();
+    saveJSON(SESSION_KEYS.memoryDeck, memoryDeck);
+  }
+
+  // ✅ Load matched ids
+  const matchedIds = loadJSON(SESSION_KEYS.memoryMatchedIds, []);
+  const matchedSet = new Set(matchedIds);
+
+  // matchesFound derived from pairs (each pair = 2 ids)
+  matchesFound = Math.floor(matchedSet.size / 2);
+
   renderMemoryGrid();
+
+  // ✅ Re-apply matched visuals
+  [...el.memoryGrid.querySelectorAll('.memory-card')].forEach((btn) => {
+    const id = Number(btn.dataset.id);
+    if (matchedSet.has(id)) {
+      btn.classList.add('matched', 'flipped');
+      btn.disabled = true;
+    }
+  });
 
   el.memoryContinueBtn.classList.add('hidden');
 
@@ -816,7 +920,7 @@ function resetMemoryGame() {
     setMemoryStatus('Already completed ✅ You can play again or press Continue!');
     el.memoryContinueBtn.classList.remove('hidden');
   } else {
-    setMemoryStatus('Match all the pairs to continue!');
+    setMemoryStatus(`Matched ${matchesFound} / 6 pairs 💘`);
   }
 }
 
@@ -878,6 +982,12 @@ el.memoryGrid.addEventListener('click', (e) => {
   // match?
   if (secondPick.card.src === firstPick.card.src) {
     markMatched(firstPick.btn, secondPick.btn);
+
+    // ✅ persist matched ids
+    const matchedIds = loadJSON(SESSION_KEYS.memoryMatchedIds, []);
+    matchedIds.push(firstPick.card.id, secondPick.card.id);
+    saveJSON(SESSION_KEYS.memoryMatchedIds, matchedIds);
+
     matchesFound++;
 
     firstPick = null;
@@ -1056,6 +1166,13 @@ el.restartBtn.addEventListener('click', () => {
   sessionStorage.removeItem(SESSION_KEYS.photoDone);
   sessionStorage.removeItem(SESSION_KEYS.scratchDone);
   sessionStorage.removeItem(SESSION_KEYS.memoryDone);
+
+  sessionStorage.removeItem(SESSION_KEYS.photoUnlocked);
+  sessionStorage.removeItem(SESSION_KEYS.photoIndex);
+  sessionStorage.removeItem(SESSION_KEYS.photoLocked);
+
+  sessionStorage.removeItem(SESSION_KEYS.memoryDeck);
+  sessionStorage.removeItem(SESSION_KEYS.memoryMatchedIds);
 
   photoGameCompleted = false;
   scratchGameCompleted = false;
