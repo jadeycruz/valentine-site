@@ -165,6 +165,12 @@ function showScreen(screen) {
   screen.classList.remove('hidden');
 }
 
+function showStart() {
+  SCREENS.forEach(s => s.classList.add('hidden'));
+  el.btnRow.classList.remove('hidden');
+  el.hint.classList.remove('hidden');
+}
+
 /***********************
  * 3) Initialize text
  ***********************/
@@ -471,18 +477,11 @@ el.cancelPlanBtn.addEventListener('click', () => {
   }
 
   // Otherwise you're already on the picker -> go back to YES/NO start screen
-  el.planner.classList.add('hidden');
-  el.gamesMenu.classList.add('hidden');
-  el.carousel.classList.add('hidden');
-  el.result.classList.add('hidden');
-
-  el.btnRow.classList.remove('hidden');
-  el.hint.classList.remove('hidden');
+  showStart();
 });
 
 el.donePlanningBtn.addEventListener('click', () => {
-  el.planner.classList.add('hidden');
-  el.gamesMenu.classList.remove('hidden');
+  showScreen(el.gamesMenu);
   
   dealSessionPhotos(); // 🎲 deal photos once for both games
 
@@ -491,7 +490,7 @@ el.donePlanningBtn.addEventListener('click', () => {
 
 el.gamesBackBtn.addEventListener('click', () => {
   el.gamesMenu.classList.add('hidden');
-  el.planner.classList.remove('hidden');
+  showScreen(el.planner);
 
   selectedActivity = null;
   renderActivityPicker();
@@ -532,8 +531,7 @@ function updateGamesContinue() {
 }
 
 el.photoGameBtn.addEventListener('click', () => {
-  el.gamesMenu.classList.add('hidden');
-  el.carousel.classList.remove('hidden');
+  showScreen(el.carousel);
 
   // do NOT reset progress here
   updateGamesContinue();
@@ -542,8 +540,7 @@ el.photoGameBtn.addEventListener('click', () => {
 });
 
 el.scratchGameBtn.addEventListener('click', () => {
-  el.gamesMenu.classList.add('hidden');
-  el.scratchGame.classList.remove('hidden');
+  showScreen(el.scratchGame);
 
   scratchGameCompleted = loadBool(SESSION_KEYS.scratchDone);
 
@@ -558,13 +555,11 @@ el.scratchGameBtn.addEventListener('click', () => {
 });
 
 el.gamesContinueBtn.addEventListener('click', () => {
-  el.gamesMenu.classList.add('hidden');
-  el.result.classList.remove('hidden');
+  showScreen(el.result);
 });
 
 el.backBtn.addEventListener('click', () => {
-  el.carousel.classList.add('hidden');
-  el.gamesMenu.classList.remove('hidden');
+  showScreen(el.gamesMenu);
 
   // Never return to the YES/NO screen from games
   el.btnRow.classList.add('hidden');
@@ -767,13 +762,11 @@ function checkScratchProgress(ctx) {
 }
 
 el.scratchBackBtn.addEventListener('click', () => {
-  el.scratchGame.classList.add('hidden');
-  el.gamesMenu.classList.remove('hidden');
+  showScreen(el.gamesMenu);
 });
 
 el.scratchContinueBtn.addEventListener('click', () => {
-  el.scratchGame.classList.add('hidden');
-  el.gamesMenu.classList.remove('hidden');
+  showScreen(el.gamesMenu);
 });
 
 /***********************
@@ -854,8 +847,7 @@ function markMatched(btnA, btnB) {
 }
 
 el.memoryGameBtn.addEventListener('click', () => {
-  el.gamesMenu.classList.add('hidden');
-  el.memoryGame.classList.remove('hidden');
+  showScreen(el.memoryGame);
 
   resetMemoryGame();
   updateGamesContinue();
@@ -910,14 +902,14 @@ el.memoryGrid.addEventListener('click', (e) => {
 });
 
 el.memoryBackBtn.addEventListener('click', () => {
-  el.memoryGame.classList.add('hidden');
-  el.gamesMenu.classList.remove('hidden');
+  showScreen(el.gamesMenu);
+
   updateGamesContinue();
 });
 
 el.memoryContinueBtn.addEventListener('click', () => {
-  el.memoryGame.classList.add('hidden');
-  el.gamesMenu.classList.remove('hidden');
+  showScreen(el.gamesMenu);
+
   updateGamesContinue();
 });
 
@@ -1071,7 +1063,6 @@ el.restartBtn.addEventListener('click', () => {
 
   // reset game-specific UI
   el.scratchContinueBtn.classList.add('hidden');
-  el.continueBtn.classList.add('hidden'); 
   
   // existing reset logic ↓↓↓
   noCount = 0;
@@ -1090,13 +1081,7 @@ el.restartBtn.addEventListener('click', () => {
   el.noBtn.style.top = '';
 
   el.hint.textContent = 'Tip: Don\'t you fkn dare press NO.';
-  el.btnRow.classList.remove('hidden');
-  el.hint.classList.remove('hidden');
-
-  el.result.classList.add('hidden');
-  el.planner.classList.add('hidden');
-  el.gamesMenu.classList.add('hidden');
-  el.carousel.classList.add('hidden');
+  showStart();
 
   selectedActivity = null;
   plans = safeLoadPlans();
