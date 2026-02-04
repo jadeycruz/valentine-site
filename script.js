@@ -548,7 +548,38 @@ let photoGameCompleted = loadBool(SESSION_KEYS.photoDone);
 let scratchGameCompleted = loadBool(SESSION_KEYS.scratchDone);
 let memoryGameCompleted = loadBool(SESSION_KEYS.memoryDone);
 
+// ✅ Save the original button labels (so we can restore them)
+const BASE_GAME_LABELS = {
+  photo: el.photoGameBtn.textContent,
+  scratch: el.scratchGameBtn.textContent,
+  memory: el.memoryGameBtn.textContent,
+};
+
+function setCompletedBadge(btn, baseLabel, isDone) {
+  if (isDone) {
+    btn.textContent = `${baseLabel} ✅ Completed`;
+    btn.classList.add('is-completed');
+  } else {
+    btn.textContent = baseLabel;
+    btn.classList.remove('is-completed');
+  }
+}
+
+function updateCompletedBadges() {
+  // Always re-read storage so badges stay accurate
+  photoGameCompleted = loadBool(SESSION_KEYS.photoDone);
+  scratchGameCompleted = loadBool(SESSION_KEYS.scratchDone);
+  memoryGameCompleted = loadBool(SESSION_KEYS.memoryDone);
+
+  setCompletedBadge(el.photoGameBtn, BASE_GAME_LABELS.photo, photoGameCompleted);
+  setCompletedBadge(el.scratchGameBtn, BASE_GAME_LABELS.scratch, scratchGameCompleted);
+  setCompletedBadge(el.memoryGameBtn, BASE_GAME_LABELS.memory, memoryGameCompleted);
+}
+
 function updateGamesContinue() {
+  // ✅ update button badges first (also refreshes booleans)
+  updateCompletedBadges();
+
   if (photoGameCompleted && scratchGameCompleted && memoryGameCompleted) {
     el.gamesContinueBtn.classList.remove('hidden');
     el.gamesContinueBtn.disabled = false;
