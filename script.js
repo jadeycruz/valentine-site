@@ -35,9 +35,13 @@ let CAROUSEL_PHOTOS = [];
 
 // ---- Random + no-overlap photo dealing (per session) ----
 const PHOTO_GAME_COUNT = 3; // photo mini game uses 3 photos
-
 let PHOTO_GAME_PHOTOS = []; // photos used in photo mini game
+
 let SCRATCH_PHOTO = "";     // photo used in scratch game
+
+const MEMORY_UNIQUE_COUNT = 6; // 6 unique photos duplicated => 12 cards
+let MEMORY_UNIQUE_PHOTOS = []; // set each session
+
 
 function shuffle(arr) {
   const a = arr.slice();
@@ -49,10 +53,27 @@ function shuffle(arr) {
 }
 
 function dealSessionPhotos() {
-  const pool = shuffle(ALL_PHOTOS);
+  const pool = shuffle([...ALL_PHOTOS]);
 
+  // Photo game gets 3
   PHOTO_GAME_PHOTOS = pool.slice(0, PHOTO_GAME_COUNT);
+
+  // Scratch gets 1 (next photo after the photo game set)
   SCRATCH_PHOTO = pool[PHOTO_GAME_COUNT] || pool[0];
+
+  // Memory gets 6 from whatever is left (no overlaps)
+  const used = new Set([...PHOTO_GAME_PHOTOS, SCRATCH_PHOTO]);
+  const remaining = pool.filter(p => !used.has(p));
+
+  MEMORY_UNIQUE_PHOTOS = remaining.slice(0, MEMORY_UNIQUE_COUNT);
+
+  // Safety fallback: if you ever have fewer than needed photos, fill from pool
+  if (MEMORY_UNIQUE_PHOTOS.length < MEMORY_UNIQUE_COUNT) {
+    const fill = pool.filter(p => !MEMORY_UNIQUE_PHOTOS.includes(p) && !used.has(p));
+    MEMORY_UNIQUE_PHOTOS = MEMORY_UNIQUE_PHOTOS.concat(
+      fill.slice(0, MEMORY_UNIQUE_COUNT - MEMORY_UNIQUE_PHOTOS.length)
+    );
+  }
 }
 
 /***********************
@@ -100,6 +121,14 @@ const el = {
   scratchCanvas: $('#scratchCanvas'),
   scratchContinueBtn: $('#scratchContinueBtn'),
   scratchBackBtn: $('#scratchBackBtn'),
+
+  // memory match game
+  memoryGameBtn: $('#memoryGameBtn'),
+  memoryGame: $('#memoryGame'),
+  memoryGrid: $('#memoryGrid'),
+  memoryStatus: $('#memoryStatus'),
+  memoryBackBtn: $('#memoryBackBtn'),
+  memoryContinueBtn: $('#memoryContinueBtn'),
 
   // photo game
   gameArea: $('#gameArea'),
@@ -460,6 +489,7 @@ el.gamesBackBtn.addEventListener('click', () => {
 const SESSION_KEYS = {
   photoDone: 'vday_photo_done',
   scratchDone: 'vday_scratch_done',
+  memoryDone: 'vday_memory_done',
 };
 
 function loadBool(key) {
@@ -472,9 +502,10 @@ function saveBool(key, val) {
 
 let photoGameCompleted = loadBool(SESSION_KEYS.photoDone);
 let scratchGameCompleted = loadBool(SESSION_KEYS.scratchDone);
+let memoryGameCompleted = loadBool(SESSION_KEYS.memoryDone);
 
 function updateGamesContinue() {
-  if (photoGameCompleted && scratchGameCompleted) {
+  if (photoGameCompleted && scratchGameCompleted && memoryGameCompleted) {
     el.gamesContinueBtn.classList.remove('hidden');
     el.gamesContinueBtn.disabled = false;
     el.gamesContinueBtn.textContent = 'Finish 💘';
@@ -737,6 +768,151 @@ el.scratchContinueBtn.addEventListener('click', () => {
 });
 
 /***********************
+ * 8.8) Memory Match Game (4x3 = 12 cards)
+ ***********************/
+let memoryDeck = [];
+let firstPick = null;
+let lockBoard = false;
+let matchesFound = 0;
+
+function buildMemoryDeck() {
+  const chosen = MEMORY_UNIQUE_PHOTOS.slice(0, 6);
+
+  // Duplicate to create pairs => 12 cards
+  const doubled = chosen.concat(chosen);
+
+  // Unique id per card
+  return shuffle(doubled.map((src, i) => ({ id: i, src })));
+}
+
+function renderMemoryGrid() {
+  el.memoryGrid.innerHTML = memoryDeck.map((card) => `
+    <button class="memory-card" type="button" data-id="${card.id}" aria-label="Memory card">
+      <div class="front">💖</div>
+      <img src="${card.src}" alt="Memory photo" />
+    </button>
+  `).join('');
+}
+
+function setMemoryStatus(text) {
+  if (el.memoryStatus) el.memoryStatus.textContent = text;
+}
+
+function resetMemoryGame() {
+  memoryGameCompleted = loadBool(SESSION_KEYS.memoryDone);
+
+  firstPick = null;
+  lockBoard = false;
+  matchesFound = 0;
+
+  memoryDeck = buildMemoryDeck();
+  renderMemoryGrid();
+
+  el.memoryContinueBtn.classList.add('hidden');
+
+  if (memoryGameCompleted) {
+    setMemoryStatus('Already completed ✅ You can play again or press Continue!');
+    el.memoryContinueBtn.classList.remove('hidden');
+  } else {
+    setMemoryStatus('Match all the pairs to continue!');
+  }
+}
+
+function finishMemoryGame() {
+  memoryGameCompleted = true;
+  saveBool(SESSION_KEYS.memoryDone, true);
+
+  setMemoryStatus('All matched 🥹💞');
+  el.memoryContinueBtn.classList.remove('hidden');
+  spawnHearts(18);
+  updateGamesContinue();
+}
+
+function flipCard(btn) {
+  btn.classList.add('flipped');
+  btn.disabled = true;
+}
+
+function unflipCard(btn) {
+  btn.classList.remove('flipped');
+  btn.disabled = false;
+}
+
+function markMatched(btnA, btnB) {
+  btnA.classList.add('matched');
+  btnB.classList.add('matched');
+  // keep disabled
+}
+
+el.memoryGameBtn.addEventListener('click', () => {
+  el.gamesMenu.classList.add('hidden');
+  el.memoryGame.classList.remove('hidden');
+
+  resetMemoryGame();
+  updateGamesContinue();
+});
+
+el.memoryGrid.addEventListener('click', (e) => {
+  const btn = e.target.closest('.memory-card');
+  if (!btn || lockBoard) return;
+
+  // If they click a matched card (disabled), ignore
+  const id = Number(btn.dataset.id);
+  const card = memoryDeck.find(c => c.id === id);
+  if (!card) return;
+
+  flipCard(btn);
+
+  if (!firstPick) {
+    firstPick = { btn, card };
+    return;
+  }
+
+  // second pick
+  const secondPick = { btn, card };
+
+  // same card protection (rare but safe)
+  if (secondPick.card.id === firstPick.card.id) return;
+
+  // match?
+  if (secondPick.card.src === firstPick.card.src) {
+    markMatched(firstPick.btn, secondPick.btn);
+    matchesFound++;
+
+    firstPick = null;
+    spawnHearts(8);
+
+    if (matchesFound >= 6) {
+      finishMemoryGame();
+    } else {
+      setMemoryStatus(`Matched ${matchesFound} / 6 pairs 💘`);
+    }
+    return;
+  }
+
+  // not a match -> flip back after a moment
+  lockBoard = true;
+  setTimeout(() => {
+    unflipCard(firstPick.btn);
+    unflipCard(secondPick.btn);
+    firstPick = null;
+    lockBoard = false;
+  }, 650);
+});
+
+el.memoryBackBtn.addEventListener('click', () => {
+  el.memoryGame.classList.add('hidden');
+  el.gamesMenu.classList.remove('hidden');
+  updateGamesContinue();
+});
+
+el.memoryContinueBtn.addEventListener('click', () => {
+  el.memoryGame.classList.add('hidden');
+  el.gamesMenu.classList.remove('hidden');
+  updateGamesContinue();
+});
+
+/***********************
  * 9) Floating hearts
  ***********************/
 function randomHeartColor() {
@@ -878,9 +1054,11 @@ el.restartBtn.addEventListener('click', () => {
   // 🔄 Reset session game progress (only on Replay)
   sessionStorage.removeItem(SESSION_KEYS.photoDone);
   sessionStorage.removeItem(SESSION_KEYS.scratchDone);
+  sessionStorage.removeItem(SESSION_KEYS.memoryDone);
 
   photoGameCompleted = false;
   scratchGameCompleted = false;
+  memoryGameCompleted = false;
 
   // existing reset logic ↓↓↓
   noCount = 0;

@@ -29,5 +29,5 @@ _2.4.26_
 
 - show subtle shuffle animation at start of mini photo game
 - prevent the same photo appearing twice in a row across sessions (check if this happens)
-- fix floating heart shape
+- fix floating heart shape in bg
 - Done (2.4.26) ~~remember progress during one session and only resets when replay is clicked~~
