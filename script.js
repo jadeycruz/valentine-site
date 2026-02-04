@@ -49,7 +49,7 @@ function shuffle(arr) {
 }
 
 function dealSessionPhotos() {
-  const pool = shuffle(CAROUSEL_PHOTOS);
+  const pool = shuffle(ALL_PHOTOS);
 
   PHOTO_GAME_PHOTOS = pool.slice(0, PHOTO_GAME_COUNT);
   SCRATCH_PHOTO = pool[PHOTO_GAME_COUNT] || pool[0];
@@ -484,6 +484,10 @@ el.photoGameBtn.addEventListener('click', () => {
 el.scratchGameBtn.addEventListener('click', () => {
   el.gamesMenu.classList.add('hidden');
   el.scratchGame.classList.remove('hidden');
+
+  scratchGameCompleted = false;
+  el.scratchContinueBtn.classList.add('hidden');
+
   initScratchGame();
 });
 
@@ -657,6 +661,10 @@ el.backBtn.addEventListener('click', () => {
 function initScratchGame() {
   const canvas = el.scratchCanvas;
   const ctx = canvas.getContext('2d');
+
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = Math.floor(rect.width);
+  canvas.height = Math.floor(rect.height);
 
   ctx.globalCompositeOperation = 'source-over';
   ctx.fillStyle = '#bdbdbd';

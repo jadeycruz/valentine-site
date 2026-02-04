@@ -1,5 +1,6 @@
 # valentine-site
 **quick little website - first time creating - dont'judge**
+documenting stuff i want to do for the website
 
 ## To-Do's:
 
@@ -23,3 +24,10 @@ _2.3.26_
 - Scratch to reveal: maybe random photo instead of fixed one
 - Add completed badge when finished games
 - maybe a visual progress bar
+
+_2.4.26_
+
+- show subtle shuffle animation at start of mini photo game
+- prevent the same photo appearing twice in a row across sessions (check if this happens)
+- fix floating heart shape
+- remember progress during one session and only resets when replay is clicked
