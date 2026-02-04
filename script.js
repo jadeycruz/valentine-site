@@ -555,25 +555,24 @@ const BASE_GAME_LABELS = {
   memory: el.memoryGameBtn.textContent,
 };
 
-function setCompletedBadge(btn, baseLabel, isDone) {
+function setCompletedBadge(btn, isDone) {
   if (isDone) {
-    btn.textContent = `${baseLabel} ✅ Completed`;
     btn.classList.add('is-completed');
+    btn.setAttribute('aria-disabled', 'true');
   } else {
-    btn.textContent = baseLabel;
     btn.classList.remove('is-completed');
+    btn.removeAttribute('aria-disabled');
   }
 }
 
 function updateCompletedBadges() {
-  // Always re-read storage so badges stay accurate
   photoGameCompleted = loadBool(SESSION_KEYS.photoDone);
   scratchGameCompleted = loadBool(SESSION_KEYS.scratchDone);
   memoryGameCompleted = loadBool(SESSION_KEYS.memoryDone);
 
-  setCompletedBadge(el.photoGameBtn, BASE_GAME_LABELS.photo, photoGameCompleted);
-  setCompletedBadge(el.scratchGameBtn, BASE_GAME_LABELS.scratch, scratchGameCompleted);
-  setCompletedBadge(el.memoryGameBtn, BASE_GAME_LABELS.memory, memoryGameCompleted);
+  setCompletedBadge(el.photoGameBtn, photoGameCompleted);
+  setCompletedBadge(el.scratchGameBtn, scratchGameCompleted);
+  setCompletedBadge(el.memoryGameBtn, memoryGameCompleted);
 }
 
 function updateGamesContinue() {
