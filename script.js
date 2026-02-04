@@ -16,8 +16,8 @@ const CONFIG = {
   noButtonText: "No",
 };
 
-// Put your photos in the same folder OR use an /photos folder.
-const CAROUSEL_PHOTOS = [
+// Put your photos in the same folder OR use an /photos folder. Full pool of photos.
+const ALL_PHOTOS = [
   "photos/photo1.jpg",
   "photos/photo2.jpg",
   "photos/photo3.jpg",
@@ -29,6 +29,9 @@ const CAROUSEL_PHOTOS = [
   "photos/photo9.jpg",
   "photos/photo10.jpg",
 ];
+
+// Mini-game photos (always exactly 3 per run)
+let CAROUSEL_PHOTOS = [];
 
 // ---- Random + no-overlap photo dealing (per session) ----
 const PHOTO_GAME_COUNT = 3; // photo mini game uses 3 photos
@@ -572,6 +575,11 @@ function showPing(xPx, yPx) {
 }
 
 function initPhotoGame() {
+  // Pick 3 random, unique photos from the pool
+  CAROUSEL_PHOTOS = [...ALL_PHOTOS]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 3);
+
   unlockedCount = 0;
   currentPhotoIndex = 0;
 
