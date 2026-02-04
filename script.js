@@ -456,8 +456,22 @@ el.gamesBackBtn.addEventListener('click', () => {
 /***********************
  * 7) Games menu + flow
  ***********************/
-let photoGameCompleted = false;
-let scratchGameCompleted = false;
+// --- Session progress (persists until Replay is clicked) ---
+const SESSION_KEYS = {
+  photoDone: 'vday_photo_done',
+  scratchDone: 'vday_scratch_done',
+};
+
+function loadBool(key) {
+  return sessionStorage.getItem(key) === '1';
+}
+
+function saveBool(key, val) {
+  sessionStorage.setItem(key, val ? '1' : '0');
+}
+
+let photoGameCompleted = loadBool(SESSION_KEYS.photoDone);
+let scratchGameCompleted = loadBool(SESSION_KEYS.scratchDone);
 
 function updateGamesContinue() {
   if (photoGameCompleted && scratchGameCompleted) {
@@ -474,8 +488,7 @@ el.photoGameBtn.addEventListener('click', () => {
   el.gamesMenu.classList.add('hidden');
   el.carousel.classList.remove('hidden');
 
-  // reset completion each time you start the game (optional)
-  photoGameCompleted = false;
+  // do NOT reset progress here
   updateGamesContinue();
 
   initPhotoGame();
@@ -625,6 +638,7 @@ el.gameArea.addEventListener('click', (e) => {
       el.hintText.textContent = 'Press Back ⬅';
 
       photoGameCompleted = true;
+      saveBool(SESSION_KEYS.photoDone, true);
       updateGamesContinue();
       return;
     }
@@ -704,6 +718,8 @@ function checkScratchProgress(ctx) {
 
   if (percent > 0.55 && !scratchGameCompleted) {
     scratchGameCompleted = true;
+    saveBool(SESSION_KEYS.scratchDone, true);
+
     el.scratchContinueBtn.classList.remove('hidden');
     spawnHearts(16);
     updateGamesContinue();
@@ -858,19 +874,25 @@ function loopConfetti() {
  * 11) Restart
  ***********************/
 el.restartBtn.addEventListener('click', () => {
+
+  // 🔄 Reset session game progress (only on Replay)
+  sessionStorage.removeItem(SESSION_KEYS.photoDone);
+  sessionStorage.removeItem(SESSION_KEYS.scratchDone);
+
+  photoGameCompleted = false;
+  scratchGameCompleted = false;
+
+  // existing reset logic ↓↓↓
   noCount = 0;
   yesScale = 1;
 
-  // Put YES button back into the original button row
   el.btnRow.insertBefore(el.yesBtn, el.btnRow.firstChild);
 
-  // Remove overlay if it exists
   if (yesOverlayEl) {
     yesOverlayEl.remove();
     yesOverlayEl = null;
   }
 
-  // reset button styles
   el.yesBtn.removeAttribute('style');
   el.noBtn.style.position = 'relative';
   el.noBtn.style.left = '';
