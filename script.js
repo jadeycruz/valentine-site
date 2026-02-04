@@ -42,7 +42,6 @@ let SCRATCH_PHOTO = "";     // photo used in scratch game
 const MEMORY_UNIQUE_COUNT = 6; // 6 unique photos duplicated => 12 cards
 let MEMORY_UNIQUE_PHOTOS = []; // set each session
 
-
 function shuffle(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
@@ -116,6 +115,7 @@ const el = {
   gamesContinueBtn: $('#gamesContinueBtn'),
 
   // scratch game
+  scratchImg: $('#scratchImg'),
   scratchGameBtn: $('#scratchGameBtn'),
   scratchGame: $('#scratchGame'),
   scratchCanvas: $('#scratchCanvas'),
@@ -148,6 +148,22 @@ const el = {
 };
 
 const ctx = el.confettiCanvas.getContext('2d');
+
+// Screens used for navigation (optional helper)
+const SCREENS = [
+  el.planner,
+  el.gamesMenu,
+  el.carousel,
+  el.scratchGame,
+  el.memoryGame,
+  el.result
+];
+
+// Optional helper (you can use later)
+function showScreen(screen) {
+  SCREENS.forEach(s => s.classList.add('hidden'));
+  screen.classList.remove('hidden');
+}
 
 /***********************
  * 3) Initialize text
@@ -529,10 +545,16 @@ el.scratchGameBtn.addEventListener('click', () => {
   el.gamesMenu.classList.add('hidden');
   el.scratchGame.classList.remove('hidden');
 
-  scratchGameCompleted = false;
-  el.scratchContinueBtn.classList.add('hidden');
+  scratchGameCompleted = loadBool(SESSION_KEYS.scratchDone);
 
-  initScratchGame();
+  if (scratchGameCompleted) {
+    el.scratchContinueBtn.classList.remove('hidden');
+  } else {
+    el.scratchContinueBtn.classList.add('hidden');
+    initScratchGame();
+  }
+
+  updateGamesContinue();
 });
 
 el.gamesContinueBtn.addEventListener('click', () => {
@@ -544,7 +566,7 @@ el.backBtn.addEventListener('click', () => {
   el.carousel.classList.add('hidden');
   el.gamesMenu.classList.remove('hidden');
 
-  // make sure YES/NO never reappear
+  // Never return to the YES/NO screen from games
   el.btnRow.classList.add('hidden');
   el.hint.classList.add('hidden');
 
@@ -623,10 +645,7 @@ function showPing(xPx, yPx) {
 }
 
 function initPhotoGame() {
-  // Pick 3 random, unique photos from the pool
-  CAROUSEL_PHOTOS = [...ALL_PHOTOS]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 3);
+  CAROUSEL_PHOTOS = PHOTO_GAME_PHOTOS.slice(); // ✅ use dealt photos
 
   unlockedCount = 0;
   currentPhotoIndex = 0;
@@ -688,22 +707,12 @@ el.nextPhotoBtn.addEventListener('click', () => {
   spawnHearts(8);
 });
 
-// Back always returns to Games list
-el.backBtn.addEventListener('click', () => {
-  el.carousel.classList.add('hidden');
-  el.gamesMenu.classList.remove('hidden');
-
-  // Keep YES/NO hidden if you don't want to go back to start via this route
-  el.btnRow.classList.add('hidden');
-  el.hint.classList.add('hidden');
-
-  updateGamesContinue();
-});
-
 /***********************
  * 8.5) Scratch to Reveal Game
  ***********************/
 function initScratchGame() {
+  el.scratchImg.src = SCRATCH_PHOTO; 
+
   const canvas = el.scratchCanvas;
   const ctx = canvas.getContext('2d');
 
@@ -1060,6 +1069,10 @@ el.restartBtn.addEventListener('click', () => {
   scratchGameCompleted = false;
   memoryGameCompleted = false;
 
+  // reset game-specific UI
+  el.scratchContinueBtn.classList.add('hidden');
+  el.continueBtn.classList.add('hidden'); 
+  
   // existing reset logic ↓↓↓
   noCount = 0;
   yesScale = 1;

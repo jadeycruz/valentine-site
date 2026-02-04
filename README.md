@@ -1,5 +1,6 @@
 # valentine-site
 **quick little website - first time creating - dont'judge**
+
 documenting stuff i want to do for the website
 
 ## To-Do's:
@@ -14,7 +15,7 @@ _2.2.26_
 _2.3.26_
 
 - Done (2.3.26) ~~Add mini games: Scratch to Reveal~~
-- Add mini games: Memory Match
+- Done (2.4.26) ~~Add mini games: Memory Match~~
 
 - Add sparkle cursor trail
 - Sound effects when clicking No button
