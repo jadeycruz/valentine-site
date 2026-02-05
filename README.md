@@ -32,3 +32,5 @@ _2.4.26_
 - prevent the same photo appearing twice in a row across sessions (check if this happens)
 - fix floating heart shape in bg
 - Done (2.4.26) ~~remember progress during one session and only resets when replay is clicked~~
+- play different music after yes/no screen
+- add hover effect on buttons

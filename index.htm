@@ -1,136 +1,161 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Will you be my Valentine?</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Will you be my Valentine?</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body>
-  <!-- Floating hearts layer -->
-  <div id="hearts-layer" aria-hidden="true"></div>
+  <body>
+    <!-- Floating hearts layer -->
+    <div id="hearts-layer" aria-hidden="true"></div>
 
-  <main class="card" role="main">
-    <p class="to-line" id="toLine"></p>
+    <main class="card" role="main">
+      <p class="to-line" id="toLine"></p>
 
-    <h1 id="mainMessage">Will you be my Valentine? 💖</h1>
-    <p class="sub" id="subMessage">I promise to stop being annoying and lazy and a fatass.</p>
+      <h1 id="mainMessage">Will you be my Valentine? 💖</h1>
+      <p class="sub" id="subMessage">
+        I promise to stop being annoying and lazy and a fatass.
+      </p>
 
-    <div class="btn-row" id="btnRow">
-      <button id="yesBtn" class="btn yes">YES</button>
-      <button id="noBtn" class="btn no">No</button>
-    </div>
+      <div class="btn-row" id="btnRow">
+        <button id="yesBtn" class="btn yes">YES</button>
+        <button id="noBtn" class="btn no">No</button>
+      </div>
 
-    <p class="hint" id="hint">Tip: Don't you fkn dare press "No".</p>
+      <p class="hint" id="hint">Tip: Don't you fkn dare press "No".</p>
 
-    <section class="panel planner hidden" id="planner">
-      <h2>Yay! Let’s plan our date 💘</h2>
-        
+      <section class="panel planner hidden" id="planner">
+        <h2>Yay! Let’s plan our date 💘</h2>
+
         <!-- JS will render activity picker OR calendar here -->
         <div id="plannerView"></div>
 
         <div class="planner-actions">
-            <button id="donePlanningBtn" class="btn yes">Done planning ➡️ Games</button>
-            <button id="cancelPlanBtn" class="btn secondary">Back</button>
+          <button id="donePlanningBtn" class="btn yes">
+            Done planning ➡️ Games
+          </button>
+          <button id="cancelPlanBtn" class="btn secondary">Back</button>
         </div>
 
-      <p class="tiny" id="planHint">Tip: pick an activity we can do 😁</p>
+        <p class="tiny" id="planHint">Tip: pick an activity we can do 😁</p>
 
-      <div class="planner-export">
-        <button id="exportTxtBtn" class="btn secondary">Export plans as text 💌</button>
-      </div>
+        <div class="planner-export">
+          <button id="exportTxtBtn" class="btn secondary">
+            Export plans as text 💌
+          </button>
+        </div>
+      </section>
 
-    </section>
+      <section class="panel games hidden" id="gamesMenu">
+        <h2>Pick a game 🎮</h2>
+        <p class="tiny">Please play them all I worked hard on em. TY!</p>
 
-    <section class="panel games hidden" id="gamesMenu">
-      <h2>Pick a game 🎮</h2>
-      <p class="tiny">Please play them all I worked hard on em. TY!</p>
-
-      <div class="games-list">
-        <button class="btn yes" id="photoGameBtn">Photo Mini Game 📸💞</button>
-        <button class="btn yes" id="scratchGameBtn">Scratch to Reveal ✨🪙</button>
-        <button class="btn yes" id="memoryGameBtn">Memory Match 🧠💘</button>
-        <button class="btn secondary" disabled>Game 4 (coming soon)</button>
-      </div>
-
-      <div class="games-actions">
-        <button class="btn secondary" id="gamesBackBtn">Back</button>
-        <button class="btn yes" id="gamesContinueBtn">Continue 💘</button>
-      </div>
-    </section>
-
-    <section class="panel carousel hidden" id="carousel">
-      <h2 class="carousel-title">Unlock our photos 💞</h2>
-      <p class="tiny" id="gamePrompt">Find the hidden heart to reveal the next photo 👀</p>
-
-      <div class="game-area" id="gameArea">
-        <img id="carouselImg" class="game-photo hidden" alt="Cute photo" />
-
-        <div class="game-overlay" id="gameOverlay">
-          <div class="lock-text" id="lockText">🔒 Locked</div>
-          <div class="hint-text" id="hintText">Click around to find the heart 💘</div>
+        <div class="games-list">
+          <button class="btn yes" id="photoGameBtn">
+            Photo Mini Game 📸💞
+          </button>
+          <button class="btn yes" id="scratchGameBtn">
+            Scratch to Reveal ✨🪙
+          </button>
+          <button class="btn yes" id="memoryGameBtn">Memory Match 🧠💘</button>
+          <button class="btn secondary" disabled>Game 4 (coming soon)</button>
         </div>
 
-        <div class="ping hidden" id="ping"></div>
+        <div class="games-actions">
+          <button class="btn secondary" id="gamesBackBtn">Back</button>
+          <button class="btn yes" id="gamesContinueBtn">Continue 💘</button>
+        </div>
+      </section>
 
-        <div class="carousel-badge" id="carouselBadge">0 / 3</div>
-      </div>
+      <section class="panel carousel hidden" id="carousel">
+        <h2 class="carousel-title">Unlock our photos 💞</h2>
+        <p class="tiny" id="gamePrompt">
+          Find the hidden heart to reveal the next photo 👀
+        </p>
 
-      <p class="tiny" id="gameStatus">0 / 3 photos unlocked</p>
+        <div class="game-area" id="gameArea">
+          <img id="carouselImg" class="game-photo hidden" alt="Cute photo" />
 
-      <div class="carousel-actions">
-        <button class="btn yes hidden" id="nextPhotoBtn">Next photo ➜</button>
-        <button class="btn secondary" id="backBtn">Back</button>
-      </div>
+          <div class="game-overlay" id="gameOverlay">
+            <div class="lock-text" id="lockText">🔒 Locked</div>
+            <div class="hint-text" id="hintText">
+              Click around to find the heart 💘
+            </div>
+          </div>
 
-      <!-- Final action -->
-      <button class="btn yes hidden" id="continueBtn">Continue 💘</button>
-    </section>
-    
-    <section class="panel scratch hidden" id="scratchGame">
-      <h2>Scratch to Reveal ✨🪙</h2>
-      <p class="tiny">Scratch the grey layer to reveal the photo!</p>
+          <div class="ping hidden" id="ping"></div>
 
-      <div class="scratch-area">
-        <img id="scratchImg" class="scratch-photo" src="" alt="Scratch photo" />
-        <canvas id="scratchCanvas" width="300" height="300"></canvas>
-      </div>
+          <div class="carousel-badge" id="carouselBadge">0 / 3</div>
+        </div>
 
-      <div class="scratch-actions">
-        <button class="btn secondary" id="scratchBackBtn">Back</button>
-        <button class="btn yes hidden" id="scratchContinueBtn">Continue 💘</button>
-      </div>
-    </section>
+        <p class="tiny" id="gameStatus">0 / 3 photos unlocked</p>
 
-    <section class="panel memory hidden" id="memoryGame">
-      <h2>Memory Match 🧠💘</h2>
-      <p class="tiny" id="memoryStatus">Match all the pairs to continue!</p>
+        <div class="carousel-actions">
+          <button class="btn yes hidden" id="nextPhotoBtn">Next photo ➜</button>
+          <button class="btn secondary" id="backBtn">Back</button>
+        </div>
 
-      <div class="memory-grid" id="memoryGrid" aria-label="Memory grid"></div>
+        <!-- Final action -->
+        <button class="btn yes hidden" id="continueBtn">Continue 💘</button>
+      </section>
 
-      <div class="memory-actions">
-        <button class="btn secondary" id="memoryBackBtn">Back</button>
-        <button class="btn yes hidden" id="memoryContinueBtn">Continue 💘</button>
-      </div>
-    </section>
+      <section class="panel scratch hidden" id="scratchGame">
+        <h2>Scratch to Reveal ✨🪙</h2>
+        <p class="tiny">Scratch the grey layer to reveal the photo!</p>
 
-    <section class="panel result hidden" id="result">
-      <h2 id="resultTitle">YAYYYYY!!! 💘 Let's plan some stuff together.</h2>  
-      <p id="resultText">You made the right choice young one. Hehe!</p>
-      <button id="restartBtn" class="btn secondary">Replay</button>
-      
-    </section>
+        <div class="scratch-area">
+          <img
+            id="scratchImg"
+            class="scratch-photo"
+            src=""
+            alt="Scratch photo"
+          />
+          <canvas id="scratchCanvas" width="300" height="300"></canvas>
+        </div>
 
-    <audio id="bgMusic" preload="auto" loop>
-      <!-- Option A: use your own file by placing it in the folder and naming it music.mp3 -->
-      <source src="music.mp3" type="audio/mpeg" />
-    </audio>
-  </main>
+        <div class="scratch-actions">
+          <button class="btn secondary" id="scratchBackBtn">Back</button>
+          <button class="btn yes hidden" id="scratchContinueBtn">
+            Continue 💘
+          </button>
+        </div>
+      </section>
 
-  <!-- Confetti canvas -->
-  <canvas id="confetti" aria-hidden="true"></canvas>
+      <section class="panel memory hidden" id="memoryGame">
+        <h2>Memory Match 🧠💘</h2>
+        <p class="tiny" id="memoryStatus">Match all the pairs to continue!</p>
 
-  <script src="script.js"></script>
-</body>
+        <div class="memory-grid" id="memoryGrid" aria-label="Memory grid"></div>
+
+        <div class="memory-actions">
+          <button class="btn secondary" id="memoryBackBtn">Back</button>
+          <button class="btn yes hidden" id="memoryContinueBtn">
+            Continue 💘
+          </button>
+        </div>
+      </section>
+
+      <section class="panel result hidden" id="result">
+        <h2 id="resultTitle">YAYYYYY!!! 💘 Let's plan some stuff together.</h2>
+        <p id="resultText">You made the right choice young one. Hehe!</p>
+
+        <div class="games-actions">
+          <button id="replayBackBtn" class="btn secondary">⬅ Back</button>
+          <button id="restartBtn" class="btn secondary">Replay</button>
+        </div>
+      </section>
+
+      <audio id="bgMusic" preload="auto" loop>
+        <!-- Option A: use your own file by placing it in the folder and naming it music.mp3 -->
+        <source src="music.mp3" type="audio/mpeg" />
+      </audio>
+    </main>
+
+    <!-- Confetti canvas -->
+    <canvas id="confetti" aria-hidden="true"></canvas>
+
+    <script src="script.js"></script>
+  </body>
 </html>

@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 console.log("script.js is running ✅");
 
@@ -37,7 +37,7 @@ let CAROUSEL_PHOTOS = [];
 const PHOTO_GAME_COUNT = 3; // photo mini game uses 3 photos
 let PHOTO_GAME_PHOTOS = []; // photos used in photo mini game
 
-let SCRATCH_PHOTO = "";     // photo used in scratch game
+let SCRATCH_PHOTO = ""; // photo used in scratch game
 
 const MEMORY_UNIQUE_COUNT = 6; // 6 unique photos duplicated => 12 cards
 let MEMORY_UNIQUE_PHOTOS = []; // set each session
@@ -62,15 +62,17 @@ function dealSessionPhotos() {
 
   // Memory gets 6 from whatever is left (no overlaps)
   const used = new Set([...PHOTO_GAME_PHOTOS, SCRATCH_PHOTO]);
-  const remaining = pool.filter(p => !used.has(p));
+  const remaining = pool.filter((p) => !used.has(p));
 
   MEMORY_UNIQUE_PHOTOS = remaining.slice(0, MEMORY_UNIQUE_COUNT);
 
   // Safety fallback: if you ever have fewer than needed photos, fill from pool
   if (MEMORY_UNIQUE_PHOTOS.length < MEMORY_UNIQUE_COUNT) {
-    const fill = pool.filter(p => !MEMORY_UNIQUE_PHOTOS.includes(p) && !used.has(p));
+    const fill = pool.filter(
+      (p) => !MEMORY_UNIQUE_PHOTOS.includes(p) && !used.has(p),
+    );
     MEMORY_UNIQUE_PHOTOS = MEMORY_UNIQUE_PHOTOS.concat(
-      fill.slice(0, MEMORY_UNIQUE_COUNT - MEMORY_UNIQUE_PHOTOS.length)
+      fill.slice(0, MEMORY_UNIQUE_COUNT - MEMORY_UNIQUE_PHOTOS.length),
     );
   }
 }
@@ -81,73 +83,74 @@ function dealSessionPhotos() {
 const $ = (sel, root = document) => root.querySelector(sel);
 
 const el = {
-  toLine: $('#toLine'),
-  mainMessage: $('#mainMessage'),
-  subMessage: $('#subMessage'),
-  yesBtn: $('#yesBtn'),
-  noBtn: $('#noBtn'),
-  hint: $('#hint'),
+  toLine: $("#toLine"),
+  mainMessage: $("#mainMessage"),
+  subMessage: $("#subMessage"),
+  yesBtn: $("#yesBtn"),
+  noBtn: $("#noBtn"),
+  hint: $("#hint"),
 
-  btnRow: $('#btnRow'),
-  heartsLayer: $('#hearts-layer'),
-  bgMusic: $('#bgMusic'),
+  btnRow: $("#btnRow"),
+  heartsLayer: $("#hearts-layer"),
+  bgMusic: $("#bgMusic"),
 
   // sections
-  planner: $('#planner'),
-  gamesMenu: $('#gamesMenu'),
-  carousel: $('#carousel'),
-  result: $('#result'),
+  planner: $("#planner"),
+  gamesMenu: $("#gamesMenu"),
+  carousel: $("#carousel"),
+  result: $("#result"),
 
   // planner
-  plannerView: $('#plannerView'),
-  cancelPlanBtn: $('#cancelPlanBtn'),
-  donePlanningBtn: $('#donePlanningBtn'),
-  exportTxtBtn: $('#exportTxtBtn'),
+  plannerView: $("#plannerView"),
+  cancelPlanBtn: $("#cancelPlanBtn"),
+  donePlanningBtn: $("#donePlanningBtn"),
+  exportTxtBtn: $("#exportTxtBtn"),
 
   // result
-  resultTitle: $('#resultTitle'),
-  resultText: $('#resultText'),
-  restartBtn: $('#restartBtn'),
+  resultTitle: $("#resultTitle"),
+  resultText: $("#resultText"),
+  restartBtn: $("#restartBtn"),
+  replayBackBtn: $("#replayBackBtn"),
 
   // games
-  photoGameBtn: $('#photoGameBtn'),
-  gamesBackBtn: $('#gamesBackBtn'),
-  gamesContinueBtn: $('#gamesContinueBtn'),
+  photoGameBtn: $("#photoGameBtn"),
+  gamesBackBtn: $("#gamesBackBtn"),
+  gamesContinueBtn: $("#gamesContinueBtn"),
 
   // scratch game
-  scratchImg: $('#scratchImg'),
-  scratchGameBtn: $('#scratchGameBtn'),
-  scratchGame: $('#scratchGame'),
-  scratchCanvas: $('#scratchCanvas'),
-  scratchContinueBtn: $('#scratchContinueBtn'),
-  scratchBackBtn: $('#scratchBackBtn'),
+  scratchImg: $("#scratchImg"),
+  scratchGameBtn: $("#scratchGameBtn"),
+  scratchGame: $("#scratchGame"),
+  scratchCanvas: $("#scratchCanvas"),
+  scratchContinueBtn: $("#scratchContinueBtn"),
+  scratchBackBtn: $("#scratchBackBtn"),
 
   // memory match game
-  memoryGameBtn: $('#memoryGameBtn'),
-  memoryGame: $('#memoryGame'),
-  memoryGrid: $('#memoryGrid'),
-  memoryStatus: $('#memoryStatus'),
-  memoryBackBtn: $('#memoryBackBtn'),
-  memoryContinueBtn: $('#memoryContinueBtn'),
+  memoryGameBtn: $("#memoryGameBtn"),
+  memoryGame: $("#memoryGame"),
+  memoryGrid: $("#memoryGrid"),
+  memoryStatus: $("#memoryStatus"),
+  memoryBackBtn: $("#memoryBackBtn"),
+  memoryContinueBtn: $("#memoryContinueBtn"),
 
   // photo game
-  gameArea: $('#gameArea'),
-  gameOverlay: $('#gameOverlay'),
-  lockText: $('#lockText'),
-  hintText: $('#hintText'),
-  gamePrompt: $('#gamePrompt'),
-  gameStatus: $('#gameStatus'),
-  ping: $('#ping'),
-  carouselImg: $('#carouselImg'),
-  carouselBadge: $('#carouselBadge'),
-  nextPhotoBtn: $('#nextPhotoBtn'),
-  backBtn: $('#backBtn'),
+  gameArea: $("#gameArea"),
+  gameOverlay: $("#gameOverlay"),
+  lockText: $("#lockText"),
+  hintText: $("#hintText"),
+  gamePrompt: $("#gamePrompt"),
+  gameStatus: $("#gameStatus"),
+  ping: $("#ping"),
+  carouselImg: $("#carouselImg"),
+  carouselBadge: $("#carouselBadge"),
+  nextPhotoBtn: $("#nextPhotoBtn"),
+  backBtn: $("#backBtn"),
 
   // confetti
-  confettiCanvas: $('#confetti'),
+  confettiCanvas: $("#confetti"),
 };
 
-const ctx = el.confettiCanvas.getContext('2d');
+const ctx = el.confettiCanvas.getContext("2d");
 
 // Screens used for navigation (optional helper)
 const SCREENS = [
@@ -156,19 +159,19 @@ const SCREENS = [
   el.carousel,
   el.scratchGame,
   el.memoryGame,
-  el.result
+  el.result,
 ];
 
 // Optional helper (you can use later)
 function showScreen(screen) {
-  SCREENS.forEach(s => s.classList.add('hidden'));
-  screen.classList.remove('hidden');
+  SCREENS.forEach((s) => s.classList.add("hidden"));
+  screen.classList.remove("hidden");
 }
 
 function showStart() {
-  SCREENS.forEach(s => s.classList.add('hidden'));
-  el.btnRow.classList.remove('hidden');
-  el.hint.classList.remove('hidden');
+  SCREENS.forEach((s) => s.classList.add("hidden"));
+  el.btnRow.classList.remove("hidden");
+  el.hint.classList.remove("hidden");
 }
 
 /***********************
@@ -209,7 +212,7 @@ function moveNoButtonAway() {
   const x = Math.random() * Math.max(0, maxX);
   const y = Math.random() * Math.max(0, maxY);
 
-  el.noBtn.style.position = 'absolute';
+  el.noBtn.style.position = "absolute";
   el.noBtn.style.left = `${x}px`;
   el.noBtn.style.top = `${y}px`;
 }
@@ -225,19 +228,19 @@ let yesOverlayEl = null;
 
 function makeYesFullscreen() {
   if (!yesOverlayEl) {
-    yesOverlayEl = document.createElement('div');
-    yesOverlayEl.id = 'yesOverlay';
+    yesOverlayEl = document.createElement("div");
+    yesOverlayEl.id = "yesOverlay";
     document.body.appendChild(yesOverlayEl);
   }
   yesOverlayEl.appendChild(el.yesBtn);
 
   // reset inline styles
-  el.yesBtn.style.position = 'static';
-  el.yesBtn.style.left = '';
-  el.yesBtn.style.top = '';
-  el.yesBtn.style.right = '';
-  el.yesBtn.style.bottom = '';
-  el.yesBtn.style.transform = 'none';
+  el.yesBtn.style.position = "static";
+  el.yesBtn.style.left = "";
+  el.yesBtn.style.top = "";
+  el.yesBtn.style.right = "";
+  el.yesBtn.style.bottom = "";
+  el.yesBtn.style.transform = "none";
 }
 
 const noPhrases = [
@@ -252,13 +255,14 @@ const noPhrases = [
   "You know... you can just click YES and this would be over.",
 ];
 
-el.noBtn.addEventListener('click', () => {
+el.noBtn.addEventListener("click", () => {
   playMusicSafely();
   noCount++;
 
   if (noCount >= FULLSCREEN_AFTER_NO_CLICKS) {
     makeYesFullscreen();
-    el.hint.textContent = noPhrases[Math.min(noCount - 1, noPhrases.length - 1)];
+    el.hint.textContent =
+      noPhrases[Math.min(noCount - 1, noPhrases.length - 1)];
     spawnHearts(6 + noCount * 2);
     return; // prevents growYesButton() / moveNoButtonAway()
   }
@@ -271,11 +275,11 @@ el.noBtn.addEventListener('click', () => {
 });
 
 // Bonus: make it harder by also moving when hovered (desktop)
-el.noBtn.addEventListener('mouseenter', () => {
+el.noBtn.addEventListener("mouseenter", () => {
   if (noCount >= 3) moveNoButtonAway();
 });
 
-el.yesBtn.addEventListener('click', () => {
+el.yesBtn.addEventListener("click", () => {
   playMusicSafely();
 
   // If YES is fullscreen, remove overlay so planner is clickable/visible
@@ -286,9 +290,9 @@ el.yesBtn.addEventListener('click', () => {
   }
 
   // Hide the buttons and open planner instead of final result
-  el.btnRow.classList.add('hidden');
-  el.hint.classList.add('hidden');
-  el.planner.classList.remove('hidden');
+  el.btnRow.classList.add("hidden");
+  el.hint.classList.add("hidden");
+  el.planner.classList.remove("hidden");
 
   // Confetti + hearts party
   startConfetti();
@@ -316,7 +320,7 @@ let selectedActivity = null;
 
 function safeLoadPlans() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
   } catch {
     return [];
   }
@@ -331,12 +335,14 @@ function renderActivityPicker() {
     <p class="tiny">Choose an activity:</p>
 
     <div class="activity-grid">
-      ${ACTIVITIES.map((a) => `
+      ${ACTIVITIES.map(
+        (a) => `
         <button class="activity-btn" type="button" data-action="select-activity" data-activity-id="${a.id}">
           <img src="${a.img}" alt="${a.name}" />
           ${a.name}
         </button>
-      `).join('')}
+      `,
+      ).join("")}
     </div>
 
     <div class="saved-list">
@@ -347,7 +353,12 @@ function renderActivityPicker() {
 
       ${
         plans.length
-          ? plans.map((p) => `<div>• ${escapeHtml(p.date)} — ${escapeHtml(p.activity)}</div>`).join('')
+          ? plans
+              .map(
+                (p) =>
+                  `<div>• ${escapeHtml(p.date)} — ${escapeHtml(p.activity)}</div>`,
+              )
+              .join("")
           : "<div class='tiny'>None yet</div>"
       }
     </div>
@@ -372,7 +383,7 @@ function renderPlanForm(activity) {
   `;
 
   // focus date input for nice UX
-  const input = $('#planDate');
+  const input = $("#planDate");
   if (input) input.focus();
 }
 
@@ -381,29 +392,29 @@ function updatePlannerActions() {
   // - you're inside an activity form
   // - OR you haven't saved anything yet
   if (selectedActivity || plans.length === 0) {
-    el.donePlanningBtn.classList.add('hidden');
+    el.donePlanningBtn.classList.add("hidden");
   } else {
-    el.donePlanningBtn.classList.remove('hidden');
+    el.donePlanningBtn.classList.remove("hidden");
   }
 }
 
 function escapeHtml(str) {
   return String(str)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 // Planner event delegation
-el.plannerView.addEventListener('click', (e) => {
-  const btn = e.target.closest('button[data-action]');
+el.plannerView.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-action]");
   if (!btn) return;
 
   const action = btn.dataset.action;
 
-  if (action === 'select-activity') {
+  if (action === "select-activity") {
     const id = btn.dataset.activityId;
     selectedActivity = ACTIVITIES.find((a) => a.id === id) || null;
     updatePlannerActions();
@@ -411,9 +422,9 @@ el.plannerView.addEventListener('click', (e) => {
     return;
   }
 
-  if (action === 'save-plan') {
-    const date = $('#planDate')?.value;
-    const note = ($('#planNote')?.value || '').trim();
+  if (action === "save-plan") {
+    const date = $("#planDate")?.value;
+    const note = ($("#planNote")?.value || "").trim();
 
     if (!date) {
       spawnHearts(6);
@@ -422,7 +433,7 @@ el.plannerView.addEventListener('click', (e) => {
 
     plans.push({
       date,
-      activity: selectedActivity?.name || 'Unknown',
+      activity: selectedActivity?.name || "Unknown",
       note,
     });
 
@@ -435,8 +446,8 @@ el.plannerView.addEventListener('click', (e) => {
     return;
   }
 
-  if (action === 'clear-plans') {
-    const confirmDelete = confirm('Delete all saved plans? 💔');
+  if (action === "clear-plans") {
+    const confirmDelete = confirm("Delete all saved plans? 💔");
     if (!confirmDelete) return;
 
     plans = [];
@@ -450,24 +461,24 @@ el.plannerView.addEventListener('click', (e) => {
 
 function exportTxt() {
   const text = plans
-    .map((p) => `${p.date} | ${p.activity} | ${p.note || '(no note)'}`)
-    .join('\n');
+    .map((p) => `${p.date} | ${p.activity} | ${p.note || "(no note)"}`)
+    .join("\n");
 
-  const blob = new Blob([text], { type: 'text/plain' });
+  const blob = new Blob([text], { type: "text/plain" });
   const url = URL.createObjectURL(blob);
 
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
-  a.download = 'valentine-plans.txt';
+  a.download = "valentine-plans.txt";
   a.click();
 
   // cleanup
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
-el.exportTxtBtn.addEventListener('click', exportTxt);
+el.exportTxtBtn.addEventListener("click", exportTxt);
 
-el.cancelPlanBtn.addEventListener('click', () => {
+el.cancelPlanBtn.addEventListener("click", () => {
   // If you're inside an activity form, go back to the activity picker
   if (selectedActivity) {
     selectedActivity = null;
@@ -480,9 +491,9 @@ el.cancelPlanBtn.addEventListener('click', () => {
   showStart();
 });
 
-el.donePlanningBtn.addEventListener('click', () => {
+el.donePlanningBtn.addEventListener("click", () => {
   showScreen(el.gamesMenu);
-  
+
   dealSessionPhotos(); // 🎲 deal photos once for both games
 
   // ✅ new photo deal => clear in-progress state for these games
@@ -496,8 +507,8 @@ el.donePlanningBtn.addEventListener('click', () => {
   updateGamesContinue();
 });
 
-el.gamesBackBtn.addEventListener('click', () => {
-  el.gamesMenu.classList.add('hidden');
+el.gamesBackBtn.addEventListener("click", () => {
+  el.gamesMenu.classList.add("hidden");
   showScreen(el.planner);
 
   selectedActivity = null;
@@ -510,25 +521,26 @@ el.gamesBackBtn.addEventListener('click', () => {
  ***********************/
 // --- Session progress (persists until Replay is clicked) ---
 const SESSION_KEYS = {
-  photoDone: 'vday_photo_done',
-  scratchDone: 'vday_scratch_done',
-  memoryDone: 'vday_memory_done',
+  photoDone: "vday_photo_done",
+  scratchDone: "vday_scratch_done",
+  memoryDone: "vday_memory_done",
 
   // ✅ Photo game in-progress
-  photoUnlocked: 'vday_photo_unlocked',
-  photoIndex: 'vday_photo_index',
-  photoLocked: 'vday_photo_locked',
+  photoUnlocked: "vday_photo_unlocked",
+  photoIndex: "vday_photo_index",
+  photoLocked: "vday_photo_locked",
 
   // ✅ Memory game in-progress
-  memoryDeck: 'vday_memory_deck',
-  memoryMatchedIds: 'vday_memory_matched_ids',
+  memoryDeck: "vday_memory_deck",
+  memoryMatchedIds: "vday_memory_matched_ids",
 };
 
 function loadBool(key) {
-  return sessionStorage.getItem(key) === '1';
+  return sessionStorage.getItem(key) === "1";
 }
+
 function saveBool(key, val) {
-  sessionStorage.setItem(key, val ? '1' : '0');
+  sessionStorage.setItem(key, val ? "1" : "0");
 }
 
 // ✅ JSON helpers
@@ -540,6 +552,7 @@ function loadJSON(key, fallback) {
     return fallback;
   }
 }
+
 function saveJSON(key, val) {
   sessionStorage.setItem(key, JSON.stringify(val));
 }
@@ -557,11 +570,11 @@ const BASE_GAME_LABELS = {
 
 function setCompletedBadge(btn, isDone) {
   if (isDone) {
-    btn.classList.add('is-completed');
-    btn.setAttribute('aria-disabled', 'true');
+    btn.classList.add("is-completed");
+    btn.setAttribute("aria-disabled", "true");
   } else {
-    btn.classList.remove('is-completed');
-    btn.removeAttribute('aria-disabled');
+    btn.classList.remove("is-completed");
+    btn.removeAttribute("aria-disabled");
   }
 }
 
@@ -580,16 +593,16 @@ function updateGamesContinue() {
   updateCompletedBadges();
 
   if (photoGameCompleted && scratchGameCompleted && memoryGameCompleted) {
-    el.gamesContinueBtn.classList.remove('hidden');
+    el.gamesContinueBtn.classList.remove("hidden");
     el.gamesContinueBtn.disabled = false;
-    el.gamesContinueBtn.textContent = 'Finish 💘';
+    el.gamesContinueBtn.textContent = "Finish 💘";
   } else {
-    el.gamesContinueBtn.classList.add('hidden');
+    el.gamesContinueBtn.classList.add("hidden");
     el.gamesContinueBtn.disabled = true;
   }
 }
 
-el.photoGameBtn.addEventListener('click', () => {
+el.photoGameBtn.addEventListener("click", () => {
   showScreen(el.carousel);
 
   // do NOT reset progress here
@@ -598,31 +611,31 @@ el.photoGameBtn.addEventListener('click', () => {
   initPhotoGame();
 });
 
-el.scratchGameBtn.addEventListener('click', () => {
+el.scratchGameBtn.addEventListener("click", () => {
   showScreen(el.scratchGame);
 
   scratchGameCompleted = loadBool(SESSION_KEYS.scratchDone);
 
   if (scratchGameCompleted) {
-    el.scratchContinueBtn.classList.remove('hidden');
+    el.scratchContinueBtn.classList.remove("hidden");
   } else {
-    el.scratchContinueBtn.classList.add('hidden');
+    el.scratchContinueBtn.classList.add("hidden");
     initScratchGame();
   }
 
   updateGamesContinue();
 });
 
-el.gamesContinueBtn.addEventListener('click', () => {
+el.gamesContinueBtn.addEventListener("click", () => {
   showScreen(el.result);
 });
 
-el.backBtn.addEventListener('click', () => {
+el.backBtn.addEventListener("click", () => {
   showScreen(el.gamesMenu);
 
   // Never return to the YES/NO screen from games
-  el.btnRow.classList.add('hidden');
-  el.hint.classList.add('hidden');
+  el.btnRow.classList.add("hidden");
+  el.hint.classList.add("hidden");
 
   updateGamesContinue();
 });
@@ -630,8 +643,8 @@ el.backBtn.addEventListener('click', () => {
 /***********************
  * 8) Photo mini game (clean rewrite)
  ***********************/
-let unlockedCount = 0;       // how many photos are unlocked (0..3)
-let currentPhotoIndex = 0;   // which photo we are working on (0..2)
+let unlockedCount = 0; // how many photos are unlocked (0..3)
+let currentPhotoIndex = 0; // which photo we are working on (0..2)
 
 let targetX = 50; // percent
 let targetY = 50; // percent
@@ -649,14 +662,14 @@ function updateProgressUI() {
 }
 
 function lockPhoto() {
-  el.carouselImg.classList.add('hidden');
-  el.gameOverlay.classList.remove('hidden');
+  el.carouselImg.classList.add("hidden");
+  el.gameOverlay.classList.remove("hidden");
 
   // Next photo button is not available while locked
-  el.nextPhotoBtn.classList.add('hidden');
+  el.nextPhotoBtn.classList.add("hidden");
 
-  el.lockText.textContent = '🔒 Locked';
-  el.hintText.textContent = 'Click around to find the heart 💘';
+  el.lockText.textContent = "🔒 Locked";
+  el.hintText.textContent = "Click around to find the heart 💘";
 
   setNewTarget();
   updateProgressUI();
@@ -665,16 +678,16 @@ function lockPhoto() {
 
 function revealPhoto() {
   el.carouselImg.src = CAROUSEL_PHOTOS[currentPhotoIndex];
-  el.carouselImg.classList.remove('hidden');
-  el.gameOverlay.classList.add('hidden');
+  el.carouselImg.classList.remove("hidden");
+  el.gameOverlay.classList.add("hidden");
 
   const isLastPhoto = currentPhotoIndex === CAROUSEL_PHOTOS.length - 1;
 
   // Only show Next if there IS a next photo to go to
   if (isLastPhoto) {
-    el.nextPhotoBtn.classList.add('hidden');
+    el.nextPhotoBtn.classList.add("hidden");
   } else {
-    el.nextPhotoBtn.classList.remove('hidden');
+    el.nextPhotoBtn.classList.remove("hidden");
   }
 
   spawnHearts(14);
@@ -709,17 +722,17 @@ function initPhotoGame() {
     unlockedCount = CAROUSEL_PHOTOS.length;
     currentPhotoIndex = CAROUSEL_PHOTOS.length - 1;
 
-    el.gamePrompt.textContent = 'All photos unlocked 🥹💞';
+    el.gamePrompt.textContent = "All photos unlocked 🥹💞";
     updateProgressUI();
 
     // show last photo
     el.carouselImg.src = CAROUSEL_PHOTOS[currentPhotoIndex];
-    el.carouselImg.classList.remove('hidden');
-    el.gameOverlay.classList.add('hidden');
-    el.nextPhotoBtn.classList.add('hidden');
+    el.carouselImg.classList.remove("hidden");
+    el.gameOverlay.classList.add("hidden");
+    el.nextPhotoBtn.classList.add("hidden");
 
-    el.lockText.textContent = '✅ Complete';
-    el.hintText.textContent = 'Press Back ⬅';
+    el.lockText.textContent = "✅ Complete";
+    el.hintText.textContent = "Press Back ⬅";
     updateGamesContinue();
     return;
   }
@@ -731,9 +744,13 @@ function initPhotoGame() {
 
   // Safety clamps
   unlockedCount = Math.max(0, Math.min(unlockedCount, CAROUSEL_PHOTOS.length));
-  currentPhotoIndex = Math.max(0, Math.min(currentPhotoIndex, CAROUSEL_PHOTOS.length - 1));
+  currentPhotoIndex = Math.max(
+    0,
+    Math.min(currentPhotoIndex, CAROUSEL_PHOTOS.length - 1),
+  );
 
-  el.gamePrompt.textContent = 'Find the hidden heart to reveal the next photo 👀';
+  el.gamePrompt.textContent =
+    "Find the hidden heart to reveal the next photo 👀";
   updateProgressUI();
 
   if (wasLocked) {
@@ -741,12 +758,12 @@ function initPhotoGame() {
   } else {
     // reveal current photo
     el.carouselImg.src = CAROUSEL_PHOTOS[currentPhotoIndex];
-    el.carouselImg.classList.remove('hidden');
-    el.gameOverlay.classList.add('hidden');
+    el.carouselImg.classList.remove("hidden");
+    el.gameOverlay.classList.add("hidden");
 
     const isLastPhoto = currentPhotoIndex === CAROUSEL_PHOTOS.length - 1;
-    if (isLastPhoto) el.nextPhotoBtn.classList.add('hidden');
-    else el.nextPhotoBtn.classList.remove('hidden');
+    if (isLastPhoto) el.nextPhotoBtn.classList.add("hidden");
+    else el.nextPhotoBtn.classList.remove("hidden");
   }
 }
 
@@ -755,12 +772,12 @@ function persistPhotoState() {
   saveJSON(SESSION_KEYS.photoIndex, currentPhotoIndex);
 
   // locked = overlay visible
-  const locked = !el.gameOverlay.classList.contains('hidden');
+  const locked = !el.gameOverlay.classList.contains("hidden");
   saveJSON(SESSION_KEYS.photoLocked, locked);
 }
 
 // Heart-finding click
-el.gameArea.addEventListener('click', (e) => {
+el.gameArea.addEventListener("click", (e) => {
   // If fully complete, ignore clicks
   if (unlockedCount >= CAROUSEL_PHOTOS.length) return;
 
@@ -775,8 +792,8 @@ el.gameArea.addEventListener('click', (e) => {
   const dist = Math.sqrt(dx * dx + dy * dy);
 
   if (dist <= HIT_RADIUS) {
-    el.lockText.textContent = '💖 Found it!';
-    el.hintText.textContent = 'Unlocked 😤';
+    el.lockText.textContent = "💖 Found it!";
+    el.hintText.textContent = "Unlocked 😤";
 
     // ✅ Count the unlock NOW (heart found = unlocked)
     unlockedCount = Math.min(unlockedCount + 1, CAROUSEL_PHOTOS.length);
@@ -788,9 +805,9 @@ el.gameArea.addEventListener('click', (e) => {
 
     // If that was the last photo, finish the game (no Finish button here)
     if (unlockedCount >= CAROUSEL_PHOTOS.length) {
-      el.gamePrompt.textContent = 'All photos unlocked 🥹💞';
-      el.lockText.textContent = '✅ Complete';
-      el.hintText.textContent = 'Press Back ⬅';
+      el.gamePrompt.textContent = "All photos unlocked 🥹💞";
+      el.lockText.textContent = "✅ Complete";
+      el.hintText.textContent = "Press Back ⬅";
 
       photoGameCompleted = true;
       saveBool(SESSION_KEYS.photoDone, true);
@@ -803,7 +820,7 @@ el.gameArea.addEventListener('click', (e) => {
 });
 
 // Next photo = navigation only (no counting)
-el.nextPhotoBtn.addEventListener('click', () => {
+el.nextPhotoBtn.addEventListener("click", () => {
   // Move to the next photo index based on how many are unlocked so far
   currentPhotoIndex = unlockedCount;
   persistPhotoState();
@@ -817,25 +834,25 @@ el.nextPhotoBtn.addEventListener('click', () => {
  * 8.5) Scratch to Reveal Game
  ***********************/
 function initScratchGame() {
-  el.scratchImg.src = SCRATCH_PHOTO; 
+  el.scratchImg.src = SCRATCH_PHOTO;
 
   const canvas = el.scratchCanvas;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
 
   const rect = canvas.getBoundingClientRect();
   canvas.width = Math.floor(rect.width);
   canvas.height = Math.floor(rect.height);
 
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.fillStyle = '#bdbdbd';
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = "#bdbdbd";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.globalCompositeOperation = 'destination-out';
+  ctx.globalCompositeOperation = "destination-out";
 
   let scratching = false;
 
-  canvas.onmousedown = () => scratching = true;
-  canvas.onmouseup = () => scratching = false;
-  canvas.onmouseleave = () => scratching = false;
+  canvas.onmousedown = () => (scratching = true);
+  canvas.onmouseup = () => (scratching = false);
+  canvas.onmouseleave = () => (scratching = false);
 
   canvas.onmousemove = (e) => {
     if (!scratching) return;
@@ -853,7 +870,12 @@ function initScratchGame() {
 }
 
 function checkScratchProgress(ctx) {
-  const img = ctx.getImageData(0, 0, el.scratchCanvas.width, el.scratchCanvas.height);
+  const img = ctx.getImageData(
+    0,
+    0,
+    el.scratchCanvas.width,
+    el.scratchCanvas.height,
+  );
   let cleared = 0;
 
   for (let i = 3; i < img.data.length; i += 4) {
@@ -866,17 +888,17 @@ function checkScratchProgress(ctx) {
     scratchGameCompleted = true;
     saveBool(SESSION_KEYS.scratchDone, true);
 
-    el.scratchContinueBtn.classList.remove('hidden');
+    el.scratchContinueBtn.classList.remove("hidden");
     spawnHearts(16);
     updateGamesContinue();
   }
 }
 
-el.scratchBackBtn.addEventListener('click', () => {
+el.scratchBackBtn.addEventListener("click", () => {
   showScreen(el.gamesMenu);
 });
 
-el.scratchContinueBtn.addEventListener('click', () => {
+el.scratchContinueBtn.addEventListener("click", () => {
   showScreen(el.gamesMenu);
 });
 
@@ -899,12 +921,16 @@ function buildMemoryDeck() {
 }
 
 function renderMemoryGrid() {
-  el.memoryGrid.innerHTML = memoryDeck.map((card) => `
+  el.memoryGrid.innerHTML = memoryDeck
+    .map(
+      (card) => `
     <button class="memory-card" type="button" data-id="${card.id}" aria-label="Memory card">
       <div class="front">💖</div>
       <img src="${card.src}" alt="Memory photo" />
     </button>
-  `).join('');
+  `,
+    )
+    .join("");
 }
 
 function setMemoryStatus(text) {
@@ -936,19 +962,21 @@ function resetMemoryGame() {
   renderMemoryGrid();
 
   // ✅ Re-apply matched visuals
-  [...el.memoryGrid.querySelectorAll('.memory-card')].forEach((btn) => {
+  [...el.memoryGrid.querySelectorAll(".memory-card")].forEach((btn) => {
     const id = Number(btn.dataset.id);
     if (matchedSet.has(id)) {
-      btn.classList.add('matched', 'flipped');
+      btn.classList.add("matched", "flipped");
       btn.disabled = true;
     }
   });
 
-  el.memoryContinueBtn.classList.add('hidden');
+  el.memoryContinueBtn.classList.add("hidden");
 
   if (memoryGameCompleted) {
-    setMemoryStatus('Already completed ✅ You can play again or press Continue!');
-    el.memoryContinueBtn.classList.remove('hidden');
+    setMemoryStatus(
+      "Already completed ✅ You can play again or press Continue!",
+    );
+    el.memoryContinueBtn.classList.remove("hidden");
   } else {
     setMemoryStatus(`Matched ${matchesFound} / 6 pairs 💘`);
   }
@@ -958,42 +986,42 @@ function finishMemoryGame() {
   memoryGameCompleted = true;
   saveBool(SESSION_KEYS.memoryDone, true);
 
-  setMemoryStatus('All matched 🥹💞');
-  el.memoryContinueBtn.classList.remove('hidden');
+  setMemoryStatus("All matched 🥹💞");
+  el.memoryContinueBtn.classList.remove("hidden");
   spawnHearts(18);
   updateGamesContinue();
 }
 
 function flipCard(btn) {
-  btn.classList.add('flipped');
+  btn.classList.add("flipped");
   btn.disabled = true;
 }
 
 function unflipCard(btn) {
-  btn.classList.remove('flipped');
+  btn.classList.remove("flipped");
   btn.disabled = false;
 }
 
 function markMatched(btnA, btnB) {
-  btnA.classList.add('matched');
-  btnB.classList.add('matched');
+  btnA.classList.add("matched");
+  btnB.classList.add("matched");
   // keep disabled
 }
 
-el.memoryGameBtn.addEventListener('click', () => {
+el.memoryGameBtn.addEventListener("click", () => {
   showScreen(el.memoryGame);
 
   resetMemoryGame();
   updateGamesContinue();
 });
 
-el.memoryGrid.addEventListener('click', (e) => {
-  const btn = e.target.closest('.memory-card');
+el.memoryGrid.addEventListener("click", (e) => {
+  const btn = e.target.closest(".memory-card");
   if (!btn || lockBoard) return;
 
   // If they click a matched card (disabled), ignore
   const id = Number(btn.dataset.id);
-  const card = memoryDeck.find(c => c.id === id);
+  const card = memoryDeck.find((c) => c.id === id);
   if (!card) return;
 
   flipCard(btn);
@@ -1041,13 +1069,13 @@ el.memoryGrid.addEventListener('click', (e) => {
   }, 650);
 });
 
-el.memoryBackBtn.addEventListener('click', () => {
+el.memoryBackBtn.addEventListener("click", () => {
   showScreen(el.gamesMenu);
 
   updateGamesContinue();
 });
 
-el.memoryContinueBtn.addEventListener('click', () => {
+el.memoryContinueBtn.addEventListener("click", () => {
   showScreen(el.gamesMenu);
 
   updateGamesContinue();
@@ -1063,8 +1091,8 @@ function randomHeartColor() {
 
 function spawnHearts(count = 10) {
   for (let i = 0; i < count; i++) {
-    const heart = document.createElement('div');
-    heart.className = 'heart';
+    const heart = document.createElement("div");
+    heart.className = "heart";
     heart.style.color = randomHeartColor();
 
     const size = 10 + Math.random() * 18;
@@ -1072,7 +1100,7 @@ function spawnHearts(count = 10) {
     heart.style.height = `${size}px`;
 
     heart.style.left = `${Math.random() * 100}vw`;
-    heart.style.bottom = '-5vh';
+    heart.style.bottom = "-5vh";
 
     const duration = 3 + Math.random() * 4;
     heart.style.animationDuration = `${duration}s`;
@@ -1190,8 +1218,7 @@ function loopConfetti() {
 /***********************
  * 11) Restart
  ***********************/
-el.restartBtn.addEventListener('click', () => {
-
+el.restartBtn.addEventListener("click", () => {
   // 🔄 Reset session game progress (only on Replay)
   sessionStorage.removeItem(SESSION_KEYS.photoDone);
   sessionStorage.removeItem(SESSION_KEYS.scratchDone);
@@ -1209,8 +1236,8 @@ el.restartBtn.addEventListener('click', () => {
   memoryGameCompleted = false;
 
   // reset game-specific UI
-  el.scratchContinueBtn.classList.add('hidden');
-  
+  el.scratchContinueBtn.classList.add("hidden");
+
   // existing reset logic ↓↓↓
   noCount = 0;
   yesScale = 1;
@@ -1222,12 +1249,12 @@ el.restartBtn.addEventListener('click', () => {
     yesOverlayEl = null;
   }
 
-  el.yesBtn.removeAttribute('style');
-  el.noBtn.style.position = 'relative';
-  el.noBtn.style.left = '';
-  el.noBtn.style.top = '';
+  el.yesBtn.removeAttribute("style");
+  el.noBtn.style.position = "relative";
+  el.noBtn.style.left = "";
+  el.noBtn.style.top = "";
 
-  el.hint.textContent = 'Tip: Don\'t you fkn dare press NO.';
+  el.hint.textContent = "Tip: Don't you fkn dare press NO.";
   showStart();
 
   selectedActivity = null;
@@ -1236,4 +1263,14 @@ el.restartBtn.addEventListener('click', () => {
   updatePlannerActions();
 
   stopConfetti();
+});
+
+el.replayBackBtn.addEventListener("click", () => {
+  showScreen(el.gamesMenu);
+
+  // ensure YES/NO never reappear
+  el.btnRow.classList.add("hidden");
+  el.hint.classList.add("hidden");
+
+  updateGamesContinue();
 });
