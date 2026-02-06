@@ -41,6 +41,3 @@ _2.5.26_
 
 - Done (2.6.26) ~~add heart bursts per correct answer in love quiz~~
 - Done (2.6.26) ~~add confetti when each game finish~~
-
-- change shape of pieces in pieace by piece to sharp edges instead of round and lower the gaps even more. pieces on the tray is still not 4:5 ratio and photos look squished
-- love quiz and scratch to reveal doenst have confetti upon completion

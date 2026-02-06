@@ -384,8 +384,8 @@ el.yesBtn.addEventListener("click", () => {
   el.hint.classList.add("hidden");
   el.planner.classList.remove("hidden");
 
-  // Confetti + hearts party
-  startConfetti();
+  // Confetti + hearts party (next frame so it always paints)
+  requestAnimationFrame(() => startConfetti());
   spawnHearts(18);
 
   // Planner always starts on activity picker
@@ -776,6 +776,9 @@ el.continueBtn.addEventListener("click", () => {
 let unlockedCount = 0; // how many photos are unlocked (0..3)
 let currentPhotoIndex = 0; // which photo we are working on (0..2)
 
+let lastUnlockAt = 0;
+const UNLOCK_COOLDOWN_MS = 350; // ✅ B) anti-spam cooldown
+
 let targetX = 50; // percent
 let targetY = 50; // percent
 let prevTargetX = null;
@@ -987,6 +990,10 @@ el.gameArea.addEventListener("click", (e) => {
   // If fully complete, ignore clicks
   if (unlockedCount >= CAROUSEL_PHOTOS.length) return;
 
+    // ✅ Only allow unlocking when the photo is LOCKED (overlay visible)
+    const isLocked = !el.gameOverlay.classList.contains("hidden");
+    if (!isLocked) return;
+
   const rect = el.gameArea.getBoundingClientRect();
   const x = ((e.clientX - rect.left) / rect.width) * 100;
   const y = ((e.clientY - rect.top) / rect.height) * 100;
@@ -998,6 +1005,15 @@ el.gameArea.addEventListener("click", (e) => {
   const dist = Math.sqrt(dx * dx + dy * dy);
 
   if (dist <= HIT_RADIUS) {
+
+    // ✅ B) anti-spam / double-click guard
+    const now = performance.now();
+    if (now - lastUnlockAt < UNLOCK_COOLDOWN_MS) return;
+    lastUnlockAt = now;
+
+    // 💖 Heart burst animation (same as Love Quiz)
+    burstHeartsAt(e.clientX, e.clientY, 12);
+
     el.lockText.textContent = "💖 Found it!";
     el.hintText.textContent = "Unlocked 😤";
 
@@ -2000,31 +2016,28 @@ function makeConfettiPiece() {
 
 function startConfetti() {
   resizeCanvas();
-  // ✅ make every call unique
   confettiBurstId++;
 
-  // ✅ ensure canvas visible (you already added something like this)
+  // ensure canvas visible
   el.confettiCanvas.classList.remove("hidden");
   el.confettiCanvas.style.display = "block";
 
-  // ✅ start loop if needed
+  // ✅ arm emitting + add burst BEFORE starting the loop
+  confettiEmitting = true;
+  confettiPieces.push(...Array.from({ length: 90 }, makeConfettiPiece));
+
+  // ✅ start loop if needed (after we have pieces/emitting)
   if (!confettiRunning) {
     confettiRunning = true;
     loopConfetti();
   }
 
-  // ✅ begin emitting (again)
-  confettiEmitting = true;
-
-  // ✅ immediate burst (always visible even if stop triggers soon)
-  confettiPieces.push(...Array.from({ length: 90 }, makeConfettiPiece));
-
-  // ✅ stop emitting ONLY if this is still the latest burst
+  // stop emitting after a bit (only if latest burst)
   const myBurst = confettiBurstId;
   if (confettiStopTimer) clearTimeout(confettiStopTimer);
 
   confettiStopTimer = setTimeout(() => {
-    if (confettiBurstId !== myBurst) return; // another burst happened after
+    if (confettiBurstId !== myBurst) return;
     confettiEmitting = false;
     confettiStopTimer = null;
   }, 1400);
