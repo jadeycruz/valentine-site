@@ -131,6 +131,21 @@ const el = {
   gamesBackBtn: $("#gamesBackBtn"),
   gamesContinueBtn: $("#gamesContinueBtn"),
 
+  // photo game
+  gameArea: $("#gameArea"),
+  gameOverlay: $("#gameOverlay"),
+  lockText: $("#lockText"),
+  hintText: $("#hintText"),
+  gamePrompt: $("#gamePrompt"),
+  gameStatus: $("#gameStatus"),
+  ping: $("#ping"),
+  carouselImg: $("#carouselImg"),
+  carouselBadge: $("#carouselBadge"),
+  nextPhotoBtn: $("#nextPhotoBtn"),
+  prevPhotoBtn: $("#prevPhotoBtn"),
+  backBtn: $("#backBtn"),
+  continueBtn: $("#continueBtn"),
+
   // scratch game
   scratchImg: $("#scratchImg"),
   scratchGameBtn: $("#scratchGameBtn"),
@@ -146,19 +161,6 @@ const el = {
   memoryStatus: $("#memoryStatus"),
   memoryBackBtn: $("#memoryBackBtn"),
   memoryContinueBtn: $("#memoryContinueBtn"),
-
-  // photo game
-  gameArea: $("#gameArea"),
-  gameOverlay: $("#gameOverlay"),
-  lockText: $("#lockText"),
-  hintText: $("#hintText"),
-  gamePrompt: $("#gamePrompt"),
-  gameStatus: $("#gameStatus"),
-  ping: $("#ping"),
-  carouselImg: $("#carouselImg"),
-  carouselBadge: $("#carouselBadge"),
-  nextPhotoBtn: $("#nextPhotoBtn"),
-  backBtn: $("#backBtn"),
 
   // love quiz
   loveQuizBtn: $("#loveQuizBtn"),
@@ -747,6 +749,11 @@ el.backBtn.addEventListener("click", () => {
   updateGamesContinue();
 });
 
+el.continueBtn.addEventListener("click", () => {
+  showScreen(el.gamesMenu);
+  updateGamesContinue();
+});
+
 /***********************
  * 8) Photo mini game (clean rewrite)
  ***********************/
@@ -781,6 +788,7 @@ function lockPhoto() {
   setNewTarget();
   updateProgressUI();
   persistPhotoState();
+  updatePhotoNav();
 }
 
 function revealPhoto() {
@@ -788,17 +796,61 @@ function revealPhoto() {
   el.carouselImg.classList.remove("hidden");
   el.gameOverlay.classList.add("hidden");
 
-  const isLastPhoto = currentPhotoIndex === CAROUSEL_PHOTOS.length - 1;
-
-  // Only show Next if there IS a next photo to go to
-  if (isLastPhoto) {
-    el.nextPhotoBtn.classList.add("hidden");
-  } else {
-    el.nextPhotoBtn.classList.remove("hidden");
-  }
-
   spawnHearts(14);
   persistPhotoState();
+  updatePhotoNav();
+}
+
+function updatePhotoNav() {
+  const total = CAROUSEL_PHOTOS.length;
+  const locked = !el.gameOverlay.classList.contains("hidden");
+
+  // Continue only when finished
+  if (photoGameCompleted || unlockedCount >= total) {
+    el.continueBtn.classList.remove("hidden");
+  } else {
+    el.continueBtn.classList.add("hidden");
+  }
+
+  // Prev allowed when there's something unlocked (even if currently locked)
+  if (unlockedCount > 0 && (locked || currentPhotoIndex > 0)) {
+    el.prevPhotoBtn.classList.remove("hidden");
+  } else {
+    el.prevPhotoBtn.classList.add("hidden");
+  }
+
+  // Next hidden while locked
+  if (locked) {
+    el.nextPhotoBtn.classList.add("hidden");
+    return;
+  }
+
+  // If completed: Next = browse forward only
+  if (photoGameCompleted) {
+    if (currentPhotoIndex < total - 1) {
+      el.nextPhotoBtn.textContent = "Next photo ▷";
+      el.nextPhotoBtn.classList.remove("hidden");
+    } else {
+      el.nextPhotoBtn.classList.add("hidden");
+    }
+    return;
+  }
+
+  // Not completed:
+  // If browsing older unlocked photos → Next photo
+  if (currentPhotoIndex < unlockedCount - 1) {
+    el.nextPhotoBtn.textContent = "Next photo ▷";
+    el.nextPhotoBtn.classList.remove("hidden");
+    return;
+  }
+
+  // If at last unlocked photo → show Unlock next (if more remain)
+  if (unlockedCount < total) {
+    el.nextPhotoBtn.textContent = "Unlock next ▶";
+    el.nextPhotoBtn.classList.remove("hidden");
+  } else {
+    el.nextPhotoBtn.classList.add("hidden");
+  }
 }
 
 function distanceHint(dist) {
@@ -827,19 +879,27 @@ function initPhotoGame() {
   photoGameCompleted = loadBool(SESSION_KEYS.photoDone);
   if (photoGameCompleted) {
     unlockedCount = CAROUSEL_PHOTOS.length;
-    currentPhotoIndex = CAROUSEL_PHOTOS.length - 1;
+
+    currentPhotoIndex = loadJSON(
+      SESSION_KEYS.photoIndex,
+      CAROUSEL_PHOTOS.length - 1,
+    );
 
     el.gamePrompt.textContent = "All photos unlocked 🥹💞";
     updateProgressUI();
 
-    // show last photo
+    // show current photo
     el.carouselImg.src = CAROUSEL_PHOTOS[currentPhotoIndex];
     el.carouselImg.classList.remove("hidden");
     el.gameOverlay.classList.add("hidden");
-    el.nextPhotoBtn.classList.add("hidden");
 
     el.lockText.textContent = "✅ Complete";
-    el.hintText.textContent = "Press Back ⬅";
+    el.hintText.textContent = "Browse photos or press Back ⬅";
+
+    el.continueBtn.classList.remove("hidden");
+
+    updatePhotoNav();
+
     updateGamesContinue();
     return;
   }
@@ -867,11 +927,8 @@ function initPhotoGame() {
     el.carouselImg.src = CAROUSEL_PHOTOS[currentPhotoIndex];
     el.carouselImg.classList.remove("hidden");
     el.gameOverlay.classList.add("hidden");
-
-    const isLastPhoto = currentPhotoIndex === CAROUSEL_PHOTOS.length - 1;
-    if (isLastPhoto) el.nextPhotoBtn.classList.add("hidden");
-    else el.nextPhotoBtn.classList.remove("hidden");
   }
+  updatePhotoNav();
 }
 
 function persistPhotoState() {
@@ -929,13 +986,45 @@ el.gameArea.addEventListener("click", (e) => {
 
 // Next photo = navigation only (no counting)
 el.nextPhotoBtn.addEventListener("click", () => {
-  // Move to the next photo index based on how many are unlocked so far
-  currentPhotoIndex = unlockedCount;
-  persistPhotoState();
+  const total = CAROUSEL_PHOTOS.length;
 
-  // Lock the next one to be found
-  lockPhoto();
-  spawnHearts(8);
+  // If browsing unlocked photos, move forward in unlocked range
+  if (currentPhotoIndex < unlockedCount - 1) {
+    currentPhotoIndex++;
+    persistPhotoState();
+    revealPhoto();
+    return;
+  }
+
+  // At last unlocked photo -> start unlocking next (if any left)
+  if (unlockedCount < total) {
+    currentPhotoIndex = unlockedCount;
+    lockPhoto(); // this also persists
+  }
+});
+
+// Prev photo = navigation only (no counting)
+el.prevPhotoBtn.addEventListener("click", () => {
+  const locked = !el.gameOverlay.classList.contains("hidden");
+
+  // If currently locked, jump back to the last unlocked photo
+  if (locked) {
+    if (unlockedCount <= 0) return;
+    currentPhotoIndex = Math.min(unlockedCount - 1, CAROUSEL_PHOTOS.length - 1);
+
+    // reveal previous
+    el.gameOverlay.classList.add("hidden");
+    persistPhotoState();
+    revealPhoto();
+    return;
+  }
+
+  // Normal browse back
+  if (currentPhotoIndex > 0) {
+    currentPhotoIndex--;
+    persistPhotoState();
+    revealPhoto();
+  }
 });
 
 /***********************

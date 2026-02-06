@@ -317,6 +317,7 @@ h1 {
   position: fixed;
   inset: 0;
   pointer-events: none;
+  z-index: 9999;
 }
 
 /* ===== Activity Planner ===== */
@@ -493,7 +494,7 @@ h1 {
   cursor: pointer;
   padding: 0;
   overflow: hidden;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 5;
   position: relative;
   box-shadow: 0 10px 18px rgba(0, 0, 0, 0.1);
 }
@@ -718,12 +719,12 @@ h1 {
 .jigsaw-board {
   margin: 12px auto 0;
   width: min(420px, 92vw);
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 4 / 5;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: 8px;
-  padding: 10px;
+  gap: 6px;   
+  padding: 6px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.75);
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -732,10 +733,12 @@ h1 {
 
 .jigsaw-slot {
   border-radius: 14px;
-  border: 2px dashed rgba(0, 0, 0, 0.16);
+  border: 1px dashed rgba(0, 0, 0, 0.16);
   background: rgba(255, 255, 255, 0.55);
   position: relative;
   overflow: hidden;
+
+  padding: 0;
 }
 
 .jigsaw-slot.is-over {
@@ -767,7 +770,7 @@ h1 {
 
 .jigsaw-piece {
   width: 80px;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 5;
   border-radius: 14px;
   border: 1px solid rgba(0, 0, 0, 0.12);
   box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
