@@ -1999,6 +1999,7 @@ function makeConfettiPiece() {
 }
 
 function startConfetti() {
+  resizeCanvas();
   // ✅ make every call unique
   confettiBurstId++;
 
