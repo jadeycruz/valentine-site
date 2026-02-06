@@ -53,6 +53,7 @@
           <button class="btn yes" id="scratchGameBtn">Scratch to Reveal ✨🪙</button>
           <button class="btn yes" id="memoryGameBtn">Memory Match 🧠💘</button>
           <button class="btn yes" id="loveQuizBtn">Love Quiz 💘📝</button>
+          <button class="btn yes" id="jigsawGameBtn">Piece by Piece 🧩🔄</button>
         </div>
 
         <div class="games-actions">
@@ -136,6 +137,26 @@
         <div class="quiz-actions">
           <button class="btn secondary" id="loveQuizBackToGamesBtn">◀ Back</button>
           <button class="btn yes hidden" id="loveQuizContinueBtn">Continue ▶</button>
+        </div>
+      </section>
+
+      <section class="panel jigsaw hidden" id="jigsawGame">
+        <h2>Piece by Piece 🧩💘</h2>
+        <p class="tiny" id="jigsawHint">
+          Drag pieces onto the board. Click a piece to rotate 90°.
+        </p>
+
+        <div class="jigsaw-top">
+          <div class="jigsaw-counter" id="jigsawCounter">Placed 0 / 12</div>
+        </div>
+
+        <div class="jigsaw-board" id="jigsawBoard" aria-label="Jigsaw board"></div>
+
+        <h3 class="jigsaw-subtitle">Pieces tray</h3>
+        <div class="jigsaw-tray" id="jigsawTray" aria-label="Jigsaw tray"></div>
+
+        <div class="jigsaw-actions">
+          <button class="btn secondary" id="jigsawBackBtn">◀ Back</button>
         </div>
       </section>
 

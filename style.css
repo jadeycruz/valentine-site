@@ -629,3 +629,107 @@ h1 {
     opacity: 0;
   }
 }
+
+/* ========== Jigsaw: Piece by Piece ========== */
+.jigsaw-top {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.jigsaw-counter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.jigsaw-board {
+  margin: 12px auto 0;
+  width: min(420px, 92vw);
+  aspect-ratio: 4 / 3;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 8px;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.jigsaw-slot {
+  border-radius: 14px;
+  border: 2px dashed rgba(0, 0, 0, 0.16);
+  background: rgba(255, 255, 255, 0.55);
+  position: relative;
+  overflow: hidden;
+}
+
+.jigsaw-slot.is-over {
+  border-style: solid;
+  border-color: rgba(255, 77, 109, 0.55);
+  box-shadow: 0 10px 18px rgba(255, 77, 109, 0.12);
+}
+
+.jigsaw-subtitle {
+  margin: 14px 0 6px;
+  font-size: 13px;
+  font-weight: 900;
+  opacity: 0.85;
+  text-align: center;
+}
+
+.jigsaw-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  max-height: 200px;
+  overflow: auto;
+}
+
+.jigsaw-piece {
+  width: 80px;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
+  background-repeat: no-repeat;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transform: rotate(var(--rot, 0deg));
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+.jigsaw-piece:active {
+  cursor: grabbing;
+  transform: rotate(var(--rot, 0deg)) scale(0.98);
+}
+
+.jigsaw-piece.is-placed {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 12px;
+  box-shadow: none;
+  cursor: default;
+}
+
+.jigsaw-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+}

@@ -28,16 +28,18 @@ const ALL_PHOTOS = [
   "photos/photo8.jpg",
   "photos/photo9.jpg",
   "photos/photo10.jpg",
+  "photos/photo11.jpg",
 ];
 
 // Mini-game photos (always exactly 3 per run)
 let CAROUSEL_PHOTOS = [];
-
 // ---- Random + no-overlap photo dealing (per session) ----
 const PHOTO_GAME_COUNT = 3; // photo mini game uses 3 photos
 let PHOTO_GAME_PHOTOS = []; // photos used in photo mini game
 
 let SCRATCH_PHOTO = ""; // photo used in scratch game
+
+let JIGSAW_PHOTO = ""; // photo used in jigsaw game 
 
 const MEMORY_UNIQUE_COUNT = 6; // 6 unique photos duplicated => 12 cards
 let MEMORY_UNIQUE_PHOTOS = []; // set each session
@@ -57,23 +59,20 @@ function dealSessionPhotos() {
   // Photo game gets 3
   PHOTO_GAME_PHOTOS = pool.slice(0, PHOTO_GAME_COUNT);
 
-  // Scratch gets 1 (next photo after the photo game set)
+  // Scratch gets 1
   SCRATCH_PHOTO = pool[PHOTO_GAME_COUNT] || pool[0];
 
-  // Memory gets 6 from whatever is left (no overlaps)
-  const used = new Set([...PHOTO_GAME_PHOTOS, SCRATCH_PHOTO]);
-  const remaining = pool.filter((p) => !used.has(p));
+  // Memory gets 6 unique (no overlaps)
+  MEMORY_UNIQUE_PHOTOS = pool.slice(PHOTO_GAME_COUNT + 1, PHOTO_GAME_COUNT + 1 + MEMORY_UNIQUE_COUNT);
 
-  MEMORY_UNIQUE_PHOTOS = remaining.slice(0, MEMORY_UNIQUE_COUNT);
+  // Jigsaw gets 1 unique (the next photo)
+  JIGSAW_PHOTO = pool[PHOTO_GAME_COUNT + 1 + MEMORY_UNIQUE_COUNT] || "";
 
-  // Safety fallback: if you ever have fewer than needed photos, fill from pool
-  if (MEMORY_UNIQUE_PHOTOS.length < MEMORY_UNIQUE_COUNT) {
-    const fill = pool.filter(
-      (p) => !MEMORY_UNIQUE_PHOTOS.includes(p) && !used.has(p),
-    );
-    MEMORY_UNIQUE_PHOTOS = MEMORY_UNIQUE_PHOTOS.concat(
-      fill.slice(0, MEMORY_UNIQUE_COUNT - MEMORY_UNIQUE_PHOTOS.length),
-    );
+  // Safety fallback if something weird happens
+  const used = new Set([...PHOTO_GAME_PHOTOS, SCRATCH_PHOTO, ...MEMORY_UNIQUE_PHOTOS].filter(Boolean));
+  if (!JIGSAW_PHOTO || used.has(JIGSAW_PHOTO)) {
+    const remaining = pool.filter((p) => !used.has(p));
+    JIGSAW_PHOTO = remaining[0] || pool[0];
   }
 }
 
@@ -160,6 +159,14 @@ const el = {
   loveQuizScoreBackBtn: $("#loveQuizScoreBackBtn"),
   quizToast: $("#quizToast"),
 
+  // jigsaw game
+  jigsawGameBtn: $("#jigsawGameBtn"),
+  jigsawGame: $("#jigsawGame"),
+  jigsawBoard: $("#jigsawBoard"),
+  jigsawTray: $("#jigsawTray"),
+  jigsawCounter: $("#jigsawCounter"),
+  jigsawBackBtn: $("#jigsawBackBtn"),
+
   // confetti
   confettiCanvas: $("#confetti"),
 };
@@ -175,6 +182,7 @@ const SCREENS = [
   el.memoryGame,
   el.loveQuiz,
   el.loveQuizScore,
+  el.jigsawGame,
   el.result,
 ];
 
@@ -508,9 +516,7 @@ el.cancelPlanBtn.addEventListener("click", () => {
 });
 
 el.donePlanningBtn.addEventListener("click", () => {
-  showScreen(el.gamesMenu);
-
-  dealSessionPhotos(); // 🎲 deal photos once for both games
+  dealSessionPhotos(); // 🎲 deal photos once for all games
 
   // ✅ new photo deal => clear in-progress state for these games
   sessionStorage.removeItem(SESSION_KEYS.photoUnlocked);
@@ -520,6 +526,15 @@ el.donePlanningBtn.addEventListener("click", () => {
   sessionStorage.removeItem(SESSION_KEYS.memoryDeck);
   sessionStorage.removeItem(SESSION_KEYS.memoryMatchedIds);
 
+  // 🧩 Jigsaw
+  sessionStorage.removeItem(SESSION_KEYS.jigsawDone);
+  sessionStorage.removeItem(SESSION_KEYS.jigsawPhoto);
+  sessionStorage.removeItem(SESSION_KEYS.jigsawPlaced);
+  sessionStorage.removeItem(SESSION_KEYS.jigsawRot);
+  sessionStorage.removeItem(SESSION_KEYS.jigsawOrder);
+  jigsawGameCompleted = false;
+
+  showScreen(el.gamesMenu);
   updateGamesContinue();
 });
 
@@ -541,6 +556,7 @@ const SESSION_KEYS = {
   scratchDone: "vday_scratch_done",
   memoryDone: "vday_memory_done",
   loveQuizDone: "vday_lovequiz_done",
+  jigsawDone: "vday_jigsaw_done",
 
   // ✅ Photo game in-progress
   photoUnlocked: "vday_photo_unlocked",
@@ -556,6 +572,12 @@ const SESSION_KEYS = {
   loveQuizSelected: "vday_lovequiz_selected",
   loveQuizSolved: "vday_lovequiz_solved",
   loveQuizWrongTotal: "vday_lovequiz_wrong_total",
+
+  // ✅ Jigsaw in-progress
+  jigsawPhoto: "vday_jigsaw_photo",
+  jigsawPlaced: "vday_jigsaw_placed",     // array of booleans length 12
+  jigsawRot: "vday_jigsaw_rot",           // array of ints length 12 (0..3)
+  jigsawOrder: "vday_jigsaw_order",       // array of piece ids in tray order
 };
 
 function loadBool(key) {
@@ -584,6 +606,7 @@ let photoGameCompleted = loadBool(SESSION_KEYS.photoDone);
 let scratchGameCompleted = loadBool(SESSION_KEYS.scratchDone);
 let memoryGameCompleted = loadBool(SESSION_KEYS.memoryDone);
 let loveQuizCompleted = loadBool(SESSION_KEYS.loveQuizDone);
+let jigsawGameCompleted = loadBool(SESSION_KEYS.jigsawDone);
 
 // ✅ Save the original button labels (so we can restore them)
 const BASE_GAME_LABELS = {
@@ -591,6 +614,7 @@ const BASE_GAME_LABELS = {
   scratch: el.scratchGameBtn.textContent,
   memory: el.memoryGameBtn.textContent,
   loveQuiz: el.loveQuizBtn.textContent,
+  jigsaw: el.jigsawGameBtn.textContent,
 };
 
 function setCompletedBadge(btn, isDone) {
@@ -608,11 +632,13 @@ function updateCompletedBadges() {
   scratchGameCompleted = loadBool(SESSION_KEYS.scratchDone);
   memoryGameCompleted = loadBool(SESSION_KEYS.memoryDone);
   loveQuizCompleted = loadBool(SESSION_KEYS.loveQuizDone);
+  jigsawGameCompleted = loadBool(SESSION_KEYS.jigsawDone);
 
   setCompletedBadge(el.photoGameBtn, photoGameCompleted);
   setCompletedBadge(el.scratchGameBtn, scratchGameCompleted);
   setCompletedBadge(el.memoryGameBtn, memoryGameCompleted);
   setCompletedBadge(el.loveQuizBtn, loveQuizCompleted);
+  setCompletedBadge(el.jigsawGameBtn, jigsawGameCompleted);
 }
 
 function updateGamesContinue() {
@@ -623,7 +649,8 @@ function updateGamesContinue() {
     photoGameCompleted && 
     scratchGameCompleted && 
     memoryGameCompleted && 
-    loveQuizCompleted
+    loveQuizCompleted &&
+    jigsawGameCompleted
   ) {
     el.gamesContinueBtn.classList.remove("hidden");
     el.gamesContinueBtn.disabled = false;
@@ -1446,6 +1473,232 @@ el.loveQuizScoreBackBtn.addEventListener("click", () => {
 });
 
 /***********************
+ * 8.4) Piece by Piece (Jigsaw 4x3)
+ ***********************/
+const JIGSAW_COLS = 4;
+const JIGSAW_ROWS = 3;
+const JIGSAW_TOTAL = JIGSAW_COLS * JIGSAW_ROWS;
+
+function defaultPlaced() {
+  return Array(JIGSAW_TOTAL).fill(false);
+}
+function defaultRot() {
+  return Array(JIGSAW_TOTAL).fill(0); // 0..3 (x 90deg)
+}
+
+function setJigsawCounter(placedArr) {
+  const placedCount = placedArr.filter(Boolean).length;
+  if (el.jigsawCounter) el.jigsawCounter.textContent = `Placed ${placedCount} / ${JIGSAW_TOTAL}`;
+}
+
+function getPieceBgStyle(src, id) {
+  const col = id % JIGSAW_COLS;
+  const row = Math.floor(id / JIGSAW_COLS);
+
+  // each piece shows 1/4 by 1/3 of the image
+  const sizeX = JIGSAW_COLS * 100; // 400%
+  const sizeY = JIGSAW_ROWS * 100; // 300%
+  const posX = (col / (JIGSAW_COLS - 1)) * 100;
+  const posY = (row / (JIGSAW_ROWS - 1)) * 100;
+
+  return `
+    background-image: url("${src}");
+    background-size: ${sizeX}% ${sizeY}%;
+    background-position: ${posX}% ${posY}%;
+  `;
+}
+
+function buildJigsawBoard() {
+  el.jigsawBoard.innerHTML = "";
+  for (let i = 0; i < JIGSAW_TOTAL; i++) {
+    const slot = document.createElement("div");
+    slot.className = "jigsaw-slot";
+    slot.dataset.slotId = String(i);
+
+    slot.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      slot.classList.add("is-over");
+    });
+
+    slot.addEventListener("dragleave", () => {
+      slot.classList.remove("is-over");
+    });
+
+    slot.addEventListener("drop", (e) => {
+      e.preventDefault();
+      slot.classList.remove("is-over");
+
+      const pieceId = Number(e.dataTransfer.getData("text/pieceId"));
+      if (!Number.isFinite(pieceId)) return;
+
+      const placed = loadJSON(SESSION_KEYS.jigsawPlaced, defaultPlaced());
+      const rots = loadJSON(SESSION_KEYS.jigsawRot, defaultRot());
+
+      // already placed?
+      if (placed[pieceId]) return;
+
+      const slotId = Number(slot.dataset.slotId);
+
+      // snap rule: correct slot + correct rotation (0)
+      const rotOk = (rots[pieceId] % 4) === 0;
+      const slotOk = slotId === pieceId;
+
+      if (!slotOk || !rotOk) {
+        spawnHearts(2);
+        return;
+      }
+
+      // ✅ place it
+      placed[pieceId] = true;
+      saveJSON(SESSION_KEYS.jigsawPlaced, placed);
+
+      const src = loadJSON(SESSION_KEYS.jigsawPhoto, JIGSAW_PHOTO) || JIGSAW_PHOTO;
+
+      // remove from tray + render into slot
+      const pieceEl = el.jigsawTray.querySelector(`.jigsaw-piece[data-piece-id="${pieceId}"]`);
+      if (pieceEl) pieceEl.remove();
+
+      const placedEl = document.createElement("div");
+      placedEl.className = "jigsaw-piece is-placed";
+      placedEl.setAttribute("style", getPieceBgStyle(src, pieceId));
+      placedEl.style.setProperty("--rot", "0deg");
+
+      slot.innerHTML = "";
+      slot.appendChild(placedEl);
+
+      spawnHearts(6);
+      setJigsawCounter(placed);
+
+      // win?
+      const done = placed.every(Boolean);
+      if (done) {
+        jigsawGameCompleted = true;
+        saveBool(SESSION_KEYS.jigsawDone, true);
+        startConfetti();
+        updateGamesContinue();
+      }
+    });
+
+    el.jigsawBoard.appendChild(slot);
+  }
+}
+
+function renderJigsawTray() {
+  el.jigsawTray.innerHTML = "";
+
+  const src = loadJSON(SESSION_KEYS.jigsawPhoto, JIGSAW_PHOTO) || JIGSAW_PHOTO;
+
+  const placed = loadJSON(SESSION_KEYS.jigsawPlaced, defaultPlaced());
+  const rots = loadJSON(SESSION_KEYS.jigsawRot, defaultRot());
+
+  // tray order persisted
+  let order = loadJSON(SESSION_KEYS.jigsawOrder, null);
+  if (!order || !Array.isArray(order) || order.length !== JIGSAW_TOTAL) {
+    order = shuffle([...Array(JIGSAW_TOTAL)].map((_, i) => i));
+    saveJSON(SESSION_KEYS.jigsawOrder, order);
+  }
+
+  order.forEach((id) => {
+    if (placed[id]) return; // already on board
+
+    const piece = document.createElement("div");
+    piece.className = "jigsaw-piece";
+    piece.draggable = true;
+    piece.dataset.pieceId = String(id);
+
+    piece.setAttribute("style", getPieceBgStyle(src, id));
+    piece.style.setProperty("--rot", `${rots[id] * 90}deg`);
+
+    piece.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/pieceId", String(id));
+      e.dataTransfer.effectAllowed = "move";
+    });
+
+    // rotate 90° on click
+    piece.addEventListener("click", () => {
+      const rotsNow = loadJSON(SESSION_KEYS.jigsawRot, defaultRot());
+      rotsNow[id] = (rotsNow[id] + 1) % 4;
+      saveJSON(SESSION_KEYS.jigsawRot, rotsNow);
+
+      piece.style.setProperty("--rot", `${rotsNow[id] * 90}deg`);
+    });
+
+    // right click also rotates (and prevents menu)
+    piece.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      piece.click();
+    });
+
+    el.jigsawTray.appendChild(piece);
+  });
+}
+
+function hydratePlacedPiecesOnBoard() {
+  const src = loadJSON(SESSION_KEYS.jigsawPhoto, JIGSAW_PHOTO) || JIGSAW_PHOTO;
+  const placed = loadJSON(SESSION_KEYS.jigsawPlaced, defaultPlaced());
+
+  [...el.jigsawBoard.querySelectorAll(".jigsaw-slot")].forEach((slot) => {
+    const slotId = Number(slot.dataset.slotId);
+    slot.innerHTML = "";
+
+    if (!placed[slotId]) return;
+
+    const placedEl = document.createElement("div");
+    placedEl.className = "jigsaw-piece is-placed";
+    placedEl.setAttribute("style", getPieceBgStyle(src, slotId));
+    placedEl.style.setProperty("--rot", "0deg");
+    slot.appendChild(placedEl);
+  });
+
+  setJigsawCounter(placed);
+}
+
+function initJigsawGame() {
+  // persist the session photo (so leaving/returning keeps same puzzle)
+  if (!loadJSON(SESSION_KEYS.jigsawPhoto, "")) {
+    saveJSON(SESSION_KEYS.jigsawPhoto, JIGSAW_PHOTO);
+  }
+
+  // init in-progress state
+  if (!loadJSON(SESSION_KEYS.jigsawPlaced, null)) {
+    saveJSON(SESSION_KEYS.jigsawPlaced, defaultPlaced());
+  }
+  if (!loadJSON(SESSION_KEYS.jigsawRot, null)) {
+    // random rotations so they must rotate to correct
+    const r = [...Array(JIGSAW_TOTAL)].map(() => Math.floor(Math.random() * 4));
+    saveJSON(SESSION_KEYS.jigsawRot, r);
+  }
+
+  buildJigsawBoard();
+  hydratePlacedPiecesOnBoard();
+  renderJigsawTray();
+
+  jigsawGameCompleted = loadBool(SESSION_KEYS.jigsawDone);
+
+  // if already completed, make sure confetti isn't needed; just show full board
+  if (jigsawGameCompleted) {
+    const placedAll = Array(JIGSAW_TOTAL).fill(true);
+    saveJSON(SESSION_KEYS.jigsawPlaced, placedAll);
+    hydratePlacedPiecesOnBoard();
+    el.jigsawTray.innerHTML = "";
+    setJigsawCounter(placedAll);
+  }
+}
+
+// Open jigsaw
+el.jigsawGameBtn.addEventListener("click", () => {
+  showScreen(el.jigsawGame);
+  initJigsawGame();
+  updateGamesContinue();
+});
+
+// Back to games
+el.jigsawBackBtn.addEventListener("click", () => {
+  showScreen(el.gamesMenu);
+  updateGamesContinue();
+});
+
+/***********************
  * 9) Floating hearts
  ***********************/
 function randomHeartColor() {
@@ -1585,27 +1838,34 @@ function loopConfetti() {
 el.restartBtn.addEventListener("click", () => {
   // 🔄 Reset session game progress (only on Replay)
   sessionStorage.removeItem(SESSION_KEYS.photoDone);
-  sessionStorage.removeItem(SESSION_KEYS.scratchDone);
-  sessionStorage.removeItem(SESSION_KEYS.memoryDone);
-  sessionStorage.removeItem(SESSION_KEYS.loveQuizDone);
-
   sessionStorage.removeItem(SESSION_KEYS.photoUnlocked);
   sessionStorage.removeItem(SESSION_KEYS.photoIndex);
   sessionStorage.removeItem(SESSION_KEYS.photoLocked);
 
+  sessionStorage.removeItem(SESSION_KEYS.scratchDone);
+  
+  sessionStorage.removeItem(SESSION_KEYS.memoryDone);
   sessionStorage.removeItem(SESSION_KEYS.memoryDeck);
   sessionStorage.removeItem(SESSION_KEYS.memoryMatchedIds);
 
+  sessionStorage.removeItem(SESSION_KEYS.loveQuizDone);
   sessionStorage.removeItem(SESSION_KEYS.loveQuizDone);
   sessionStorage.removeItem(SESSION_KEYS.loveQuizIndex);
   sessionStorage.removeItem(SESSION_KEYS.loveQuizSelected);
   sessionStorage.removeItem(SESSION_KEYS.loveQuizSolved);
   sessionStorage.removeItem(SESSION_KEYS.loveQuizWrongTotal);
 
+  sessionStorage.removeItem(SESSION_KEYS.jigsawDone);
+  sessionStorage.removeItem(SESSION_KEYS.jigsawPhoto);
+  sessionStorage.removeItem(SESSION_KEYS.jigsawPlaced);
+  sessionStorage.removeItem(SESSION_KEYS.jigsawRot);
+  sessionStorage.removeItem(SESSION_KEYS.jigsawOrder);
+
   photoGameCompleted = false;
   scratchGameCompleted = false;
   memoryGameCompleted = false;
   loveQuizCompleted = false;
+  jigsawGameCompleted = false;
 
   // reset game-specific UI
   el.scratchContinueBtn.classList.add("hidden");

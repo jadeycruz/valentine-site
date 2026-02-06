@@ -41,3 +41,8 @@ _2.5.26_
 - Add mini game: pop the bubble (why i love you unlocks)
 - Add mini game: Love Dash
 - Add minigame: heart blaster
+
+- add heart bursts per correct answer in love quiz
+- add confetti when each game finish
+
+unbold answers in lvoe quiz
