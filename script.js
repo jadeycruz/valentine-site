@@ -88,6 +88,25 @@ function dealSessionPhotos() {
     const remaining = pool.filter((p) => !used.has(p));
     JIGSAW_PHOTO = remaining[0] || pool[0];
   }
+
+    // Pop Hearts gets 1 unique (next remaining photo)
+  const used2 = new Set([
+    ...PHOTO_GAME_PHOTOS,
+    SCRATCH_PHOTO,
+    ...MEMORY_UNIQUE_PHOTOS,
+    JIGSAW_PHOTO
+  ].filter(Boolean));
+
+  const remaining2 = pool.filter((p) => !used2.has(p));
+  
+  // Pop Hearts gets a deck of photos (ideally unique per heart)
+  const targetCount = 8; // match POP_HEART_COUNT
+  let deck = remaining2.slice(0, targetCount);
+
+  // if not enough remaining, safely fill by looping the full pool
+  while (deck.length < targetCount) deck.push(pool[deck.length % pool.length]);
+
+  saveJSON(SESSION_KEYS.popDeck, deck);
 }
 
 /***********************
@@ -184,6 +203,18 @@ const el = {
   jigsawCounter: $("#jigsawCounter"),
   jigsawBackBtn: $("#jigsawBackBtn"),
 
+  // pop hearts game
+  popHeartsBtn: $("#popHeartsBtn"),
+  popHeartsGame: $("#popHeartsGame"),
+  popArena: $("#popArena"),
+  popHeartsStatus: $("#popHeartsStatus"),
+  popBackBtn: $("#popBackBtn"),
+  popContinueBtn: $("#popContinueBtn"),
+  popModal: $("#popModal"),
+  popModalImg: $("#popModalImg"),
+  popModalMsg: $("#popModalMsg"),
+  popModalCloseBtn: $("#popModalCloseBtn"),
+
   // confetti
   confettiCanvas: $("#confetti"),
 };
@@ -200,6 +231,7 @@ const SCREENS = [
   el.loveQuiz,
   el.loveQuizScore,
   el.jigsawGame,
+  el.popHeartsGame,
   el.result,
 ];
 
@@ -230,11 +262,9 @@ function spawnSparkle(x, y) {
 
   // 💕 random pink / red shades
   const colors = [
-    "#ff4d6d",
-    "#ff758f",
-    "#ff9aa2",
-    "#e63946",
-    "#ff6b81",
+    "#ffffff",
+    "#ffe4e6",
+    "#fdf2f8",
   ];
   s.style.setProperty(
     "--c",
@@ -600,6 +630,13 @@ el.donePlanningBtn.addEventListener("click", () => {
   sessionStorage.removeItem(SESSION_KEYS.jigsawOrder);
   jigsawGameCompleted = false;
 
+  // 📌 Pop Hearts
+  sessionStorage.removeItem(SESSION_KEYS.popDone);
+  sessionStorage.removeItem(SESSION_KEYS.popDeck);
+  sessionStorage.removeItem(SESSION_KEYS.popPopped);
+  sessionStorage.removeItem(SESSION_KEYS.popStickerState);
+  popHeartsCompleted = false;
+
   showScreen(el.gamesMenu);
   updateGamesContinue();
 });
@@ -644,6 +681,13 @@ const SESSION_KEYS = {
   jigsawPlaced: "vday_jigsaw_placed",     // array of booleans length 12
   jigsawRot: "vday_jigsaw_rot",           // array of ints length 12 (0..3)
   jigsawOrder: "vday_jigsaw_order",       // array of piece ids in tray order
+
+  // ✅ Pop Heart in-progress
+  popDeck: "vday_pop_deck",
+  popDone: "vday_pop_done",
+  popPopped: "vday_pop_popped", // array of popped heart ids
+  popStickerState: "vday_pop_stickers", // { [id]: { x, y, rot } }
+
 };
 
 function loadBool(key) {
@@ -673,6 +717,7 @@ let scratchGameCompleted = loadBool(SESSION_KEYS.scratchDone);
 let memoryGameCompleted = loadBool(SESSION_KEYS.memoryDone);
 let loveQuizCompleted = loadBool(SESSION_KEYS.loveQuizDone);
 let jigsawGameCompleted = loadBool(SESSION_KEYS.jigsawDone);
+let popHeartsCompleted = loadBool(SESSION_KEYS.popDone);
 
 // ✅ Save the original button labels (so we can restore them)
 const BASE_GAME_LABELS = {
@@ -681,6 +726,7 @@ const BASE_GAME_LABELS = {
   memory: el.memoryGameBtn.textContent,
   loveQuiz: el.loveQuizBtn.textContent,
   jigsaw: el.jigsawGameBtn.textContent,
+  pop: el.popHeartsBtn.textContent,
 };
 
 function setCompletedBadge(btn, isDone) {
@@ -699,12 +745,14 @@ function updateCompletedBadges() {
   memoryGameCompleted = loadBool(SESSION_KEYS.memoryDone);
   loveQuizCompleted = loadBool(SESSION_KEYS.loveQuizDone);
   jigsawGameCompleted = loadBool(SESSION_KEYS.jigsawDone);
+  popHeartsCompleted = loadBool(SESSION_KEYS.popDone);
 
   setCompletedBadge(el.photoGameBtn, photoGameCompleted);
   setCompletedBadge(el.scratchGameBtn, scratchGameCompleted);
   setCompletedBadge(el.memoryGameBtn, memoryGameCompleted);
   setCompletedBadge(el.loveQuizBtn, loveQuizCompleted);
   setCompletedBadge(el.jigsawGameBtn, jigsawGameCompleted);
+  setCompletedBadge(el.popHeartsBtn, popHeartsCompleted);
 }
 
 function updateGamesContinue() {
@@ -716,7 +764,8 @@ function updateGamesContinue() {
     scratchGameCompleted && 
     memoryGameCompleted && 
     loveQuizCompleted &&
-    jigsawGameCompleted
+    jigsawGameCompleted &&
+    popHeartsCompleted
   ) {
     el.gamesContinueBtn.classList.remove("hidden");
     el.gamesContinueBtn.disabled = false;
@@ -771,7 +820,7 @@ el.continueBtn.addEventListener("click", () => {
 });
 
 /***********************
- * 8) Photo mini game (clean rewrite)
+ * 8.0) Photo mini game (clean rewrite)
  ***********************/
 let unlockedCount = 0; // how many photos are unlocked (0..3)
 let currentPhotoIndex = 0; // which photo we are working on (0..2)
@@ -1950,6 +1999,303 @@ el.jigsawBackBtn.addEventListener("click", () => {
 });
 
 /***********************
+ * 8.5) Pop the Hearts
+ ***********************/
+const POP_HEART_COUNT = 8;
+
+const POP_MESSAGES = [
+  "10/10 human 💘",
+  "You matter to me 🤧",
+  "I love you always 💗",
+  "You always make things better 😌",
+  "You always make me laugh 😭💞",
+  "Thank you for loving me 🫶",
+  "Number 1 Overall Draft Pick 🏀",
+  "Thank you for everything that you do for me 🥺",
+];
+
+let popHearts = []; // { id, x, y, vx, vy, el }
+let popRaf = null;
+let popPaused = false;
+
+function popLoadDeck() {
+  const deck = loadJSON(SESSION_KEYS.popDeck, []);
+  if (Array.isArray(deck) && deck.length) return deck;
+
+  // fallback (should rarely happen)
+  const fallback = [];
+  for (let i = 0; i < POP_HEART_COUNT; i++) fallback.push(ALL_PHOTOS[i % ALL_PHOTOS.length]);
+  saveJSON(SESSION_KEYS.popDeck, fallback);
+  return fallback;
+}
+
+function popLoadPoppedSet() {
+  const arr = loadJSON(SESSION_KEYS.popPopped, []);
+  return new Set(Array.isArray(arr) ? arr : []);
+}
+
+function popSavePoppedSet(set) {
+  saveJSON(SESSION_KEYS.popPopped, [...set]);
+}
+
+function popSetStatus(poppedCount) {
+  if (!el.popHeartsStatus) return;
+  el.popHeartsStatus.textContent = `Popped ${poppedCount} / ${POP_HEART_COUNT}`;
+}
+
+function popStopLoop() {
+  if (popRaf) cancelAnimationFrame(popRaf);
+  popRaf = null;
+}
+
+function popStartLoop() {
+  popStopLoop();
+  const arena = el.popArena;
+  if (!arena) return;
+
+  const step = () => {
+    if (popPaused) {
+      popRaf = requestAnimationFrame(step);
+      return;
+    }
+
+    const rect = arena.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+
+    for (const b of popHearts) {
+      if (!b.el) continue;
+
+      b.x += b.vx;
+      b.y += b.vy;
+
+      // bounce off edges (keep inside)
+      const r = 32; // half of 64px
+      if (b.x < r) { b.x = r; b.vx *= -1; }
+      if (b.x > w - r) { b.x = w - r; b.vx *= -1; }
+      if (b.y < r) { b.y = r; b.vy *= -1; }
+      if (b.y > h - r) { b.y = h - r; b.vy *= -1; }
+
+      b.el.style.left = `${b.x}px`;
+      b.el.style.top = `${b.y}px`;
+    }
+
+    popRaf = requestAnimationFrame(step);
+  };
+
+  popRaf = requestAnimationFrame(step);
+}
+
+function popShowModal(photoSrc, msg) {
+  el.popModalImg.src = photoSrc;
+  el.popModalMsg.textContent = msg;
+
+  el.popModal.classList.remove("hidden");
+  popPaused = true;
+}
+
+function popHideModal() {
+  el.popModal.classList.add("hidden");
+  popPaused = false;
+}
+
+function popLoadStickerState() {
+  const st = loadJSON(SESSION_KEYS.popStickerState, {});
+  return (st && typeof st === "object") ? st : {};
+}
+
+function popSaveStickerState(state) {
+  saveJSON(SESSION_KEYS.popStickerState, state);
+}
+
+function popClamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+}
+
+function popDropSticker({ id, x, y, photoSrc, msg }) {
+  const arena = el.popArena;
+  const rect = arena.getBoundingClientRect();
+
+  // keep sticker inside arena bounds a bit
+  const padX = 55; // ~half sticker width
+  const padY = 70; // ~half sticker height
+  const cx = popClamp(x, padX, rect.width - padX);
+  const cy = popClamp(y, padY, rect.height - padY);
+
+  const sticker = document.createElement("div");
+  sticker.className = "pop-sticker";
+  sticker.dataset.id = String(id);
+
+  // cute random tilt
+  const rot = (Math.random() * 10 - 5).toFixed(2);
+
+  sticker.style.left = `${cx}px`;
+  sticker.style.top = `${cy}px`;
+  sticker.style.transform = `translate(-50%, -50%) rotate(${rot}deg)`;
+
+  sticker.innerHTML = `
+    <div class="paper">
+      <img src="${photoSrc}" alt="Photo" />
+      <div class="cap">${msg}</div>
+    </div>
+  `;
+
+  arena.appendChild(sticker);
+}
+
+function popFinishGame() {
+  popHeartsCompleted = true;
+  saveBool(SESSION_KEYS.popDone, true);
+
+  el.popContinueBtn.classList.remove("hidden");
+  startConfetti();
+  updateGamesContinue();
+}
+
+function initPopHeartsGame() {
+  showScreen(el.popHeartsGame);
+
+  // reset UI
+  el.popContinueBtn.classList.add("hidden");
+  el.popArena.innerHTML = "";
+
+  // ✅ MUST be defined BEFORE you use them
+  const deck = popLoadDeck();
+  const popped = popLoadPoppedSet();
+  const stickerState = popLoadStickerState();
+
+  // Re-render stickers for already popped hearts (session persistence)
+  for (const idStr of Object.keys(stickerState)) {
+    const id = Number(idStr);
+    if (!Number.isFinite(id)) continue;
+    if (!popped.has(id)) continue;
+
+    const s = stickerState[idStr];
+    const msg = POP_MESSAGES[id % POP_MESSAGES.length];
+    const photoSrc = deck[id % deck.length];
+
+    popDropSticker({ id, x: s.x, y: s.y, photoSrc, msg });
+  }
+
+  // completed?
+  popHeartsCompleted = loadBool(SESSION_KEYS.popDone);
+  if (popHeartsCompleted) {
+    popSetStatus(POP_HEART_COUNT);
+    el.popContinueBtn.classList.remove("hidden");
+    updateGamesContinue();
+    popStopLoop();
+    return;
+  }
+
+  // build hearts
+  const rect = el.popArena.getBoundingClientRect();
+  const w = rect.width || 320;
+  const h = rect.height || 400;
+
+  popHearts = [];
+
+  for (let i = 0; i < POP_HEART_COUNT; i++) {
+    // skip popped hearts
+    if (popped.has(i)) continue;
+
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "pop-heart";
+    b.dataset.id = String(i);
+    b.innerHTML = `<span>💗</span>`;
+
+    // random start
+    const x = 40 + Math.random() * (w - 80);
+    const y = 40 + Math.random() * (h - 80);
+
+    // random velocity
+    const speed = 0.6 + Math.random() * 1.2;
+    const ang = Math.random() * Math.PI * 2;
+    const vx = Math.cos(ang) * speed;
+    const vy = Math.sin(ang) * speed;
+
+    const obj = { id: i, x, y, vx, vy, el: b };
+    popHearts.push(obj);
+
+    b.style.left = `${x}px`;
+    b.style.top = `${y}px`;
+
+    b.addEventListener("click", () => {
+      if (popPaused) return;
+
+      const id = Number(b.dataset.id);
+      if (!Number.isFinite(id)) return;
+
+      // mark popped
+      b.classList.add("is-popped");
+      setTimeout(() => b.remove(), 220);
+
+      popped.add(id);
+      popSavePoppedSet(popped);
+      popSetStatus(popped.size);
+
+      // message + per-heart photo
+      const msg = POP_MESSAGES[id % POP_MESSAGES.length];
+      const heartPhoto = deck[id % deck.length];
+
+      // save sticker position for persistence
+      stickerState[String(id)] = { x: obj.x, y: obj.y, rot: 0 };
+      popSaveStickerState(stickerState);
+
+      // drop sticky-note photo where it popped
+      popDropSticker({ id, x: obj.x, y: obj.y, photoSrc: heartPhoto, msg });
+
+      // ✅ keep popup (ONLY ONCE)
+      popShowModal(heartPhoto, msg);
+
+      // win?
+      if (popped.size >= POP_HEART_COUNT) {
+        popFinishGame();
+      }
+    });
+
+    el.popArena.appendChild(b);
+  }
+
+  popSetStatus(popped.size);
+
+  // if they somehow popped all without the done flag, fix it
+  if (popped.size >= POP_HEART_COUNT) {
+    popFinishGame();
+    return;
+  }
+
+  updateGamesContinue();
+  popPaused = false;
+  popStartLoop();
+}
+
+// open from games menu
+el.popHeartsBtn.addEventListener("click", () => {
+  initPopHeartsGame();
+});
+
+// modal close
+el.popModalCloseBtn.addEventListener("click", () => {
+  popHideModal();
+});
+
+// back/continue
+el.popBackBtn.addEventListener("click", () => {
+  popHideModal();
+  popStopLoop();
+  showScreen(el.gamesMenu);
+  updateGamesContinue();
+});
+
+el.popContinueBtn.addEventListener("click", () => {
+  popHideModal();
+  popStopLoop();
+  showScreen(el.gamesMenu);
+  updateGamesContinue();
+});
+
+/***********************
  * 9) Floating hearts
  ***********************/
 function randomHeartColor() {
@@ -2119,11 +2465,17 @@ el.restartBtn.addEventListener("click", () => {
   sessionStorage.removeItem(SESSION_KEYS.jigsawRot);
   sessionStorage.removeItem(SESSION_KEYS.jigsawOrder);
 
+  sessionStorage.removeItem(SESSION_KEYS.popDone);
+  sessionStorage.removeItem(SESSION_KEYS.popDeck);
+  sessionStorage.removeItem(SESSION_KEYS.popPopped);
+  sessionStorage.removeItem(SESSION_KEYS.popStickerState);
+
   photoGameCompleted = false;
   scratchGameCompleted = false;
   memoryGameCompleted = false;
   loveQuizCompleted = false;
   jigsawGameCompleted = false;
+  popHeartsCompleted = false;
 
   // reset game-specific UI
   el.scratchContinueBtn.classList.add("hidden");

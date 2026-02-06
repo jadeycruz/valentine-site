@@ -54,6 +54,7 @@
           <button class="btn yes" id="memoryGameBtn">Memory Match 🧠💘</button>
           <button class="btn yes" id="loveQuizBtn">Love Quiz 💘📝</button>
           <button class="btn yes" id="jigsawGameBtn">Piece by Piece 🧩🔄</button>
+          <button class="btn yes" id="popHeartsBtn">Pop the Hearts 📌🫧</button>
         </div>
 
         <div class="games-actions">
@@ -141,6 +142,16 @@
         </div>
       </section>
 
+      <section class="panel quiz hidden" id="loveQuizScore">
+        <h2>Love Quiz Results 💯</h2>
+        <p class="tiny" id="loveQuizScoreLine">Score here…</p>
+        <p class="tiny" id="loveQuizScoreDetails"></p>
+
+        <div class="quiz-actions">
+          <button class="btn secondary" id="loveQuizScoreBackBtn">◀ Back</button>
+        </div>
+      </section>
+
       <section class="panel jigsaw hidden" id="jigsawGame">
         <h2>Piece by Piece 🧩💘</h2>
         <p class="tiny" id="jigsawHint">
@@ -160,14 +171,25 @@
           <button class="btn secondary" id="jigsawBackBtn">◀ Back</button>
         </div>
       </section>
+      
+      <section class="panel pop hidden" id="popHeartsGame">
+        <h2>Pop the Hearts 📌🫧</h2>
+        <p class="tiny" id="popHeartsStatus">Pop all the hearts!</p>
 
-      <section class="panel quiz hidden" id="loveQuizScore">
-        <h2>Love Quiz Results 💯</h2>
-        <p class="tiny" id="loveQuizScoreLine">Score here…</p>
-        <p class="tiny" id="loveQuizScoreDetails"></p>
+        <div class="pop-arena" id="popArena" aria-label="Pop hearts arena"></div>
 
-        <div class="quiz-actions">
-          <button class="btn secondary" id="loveQuizScoreBackBtn">◀ Back</button>
+        <!-- message modal -->
+        <div class="pop-modal hidden" id="popModal" role="dialog" aria-modal="true">
+          <div class="pop-modal-card">
+            <img id="popModalImg" alt="Cute photo" />
+            <p class="pop-modal-msg" id="popModalMsg"></p>
+            <button class="btn yes" id="popModalCloseBtn" type="button">OK 💗</button>
+          </div>
+        </div>
+
+        <div class="pop-actions">
+          <button class="btn secondary" id="popBackBtn">◀ Back</button>
+          <button class="btn yes hidden" id="popContinueBtn">Continue ▶</button>
         </div>
       </section>
 

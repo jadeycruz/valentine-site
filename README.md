@@ -41,3 +41,6 @@ _2.5.26_
 
 - Done (2.6.26) ~~add heart bursts per correct answer in love quiz~~
 - Done (2.6.26) ~~add confetti when each game finish~~
+
+
+add continue on love quiz result screen and piece by piece
