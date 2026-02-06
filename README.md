@@ -18,31 +18,26 @@ _2.3.26_
 - Done (2.4.26) ~~Add mini game: Memory Match~~
 - Done (2.4.26) ~~Scratch to reveal: maybe random photo instead of fixed one~~
 
-- Add sparkle cursor trail
+- Done (2.6.26) ~~Add sparkle cursor trail~~
 - Sound effects when clicking No button
 - Add touch support (mobile scratching) for Scratch to Reveal
-- Heart-shaped scratch brush
-- sparkle burst on completion of games
-- Add completed badge when finished games
-- maybe a visual progress bar
+- Done (2.6.26) ~~Heart-shaped scratch brush~~
 
 _2.4.26_
 
 - Done (2.4.26) ~~remember progress during one session and only resets when replay is clicked~~
 - show subtle shuffle animation at start of mini photo game
-- prevent the same photo appearing twice in a row across sessions (check if this happens)
-- fix floating heart shape in bg
-- play different music after yes/no screen
-- add hover effect on buttons
+- Done (2.4.26) ~~prevent the same photo appearing twice in a row across sessions (check if this happens)~~
+- Done (2.6.26) ~~fix floating heart shape in bg~~
+- Done (2.6.26) ~~play different music after yes/no screen~~
+- aDone (2.6.26) ~~add hover effect on buttons~~
 
 _2.5.26_
 - Done (2.5.26) ~~Add mini game: love quiz~~
-- Add mini game: Piece by Piece
+- Done (2.5.26) ~~Add mini game: Piece by Piece~~
 - Add mini game: pop the bubble (why i love you unlocks)
 - Add mini game: Love Dash
 - Add minigame: heart blaster
 
-- add heart bursts per correct answer in love quiz
-- add confetti when each game finish
-
-unbold answers in lvoe quiz
+- Done (2.6.26) ~~add heart bursts per correct answer in love quiz~~
+- Done (2.6.26) ~~add confetti when each game finish~~

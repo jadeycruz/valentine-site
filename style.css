@@ -122,6 +122,29 @@ h1 {
   color: #333;
 }
 
+.btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  filter: brightness(1.03);
+}
+
+.btn.secondary:hover {
+  filter: brightness(1.02);
+}
+
+.activity-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.02);
+}
+
+.quiz-option:hover:not(.is-wrong):not(.is-disabled):not(.is-correct) {
+  transform: translateY(-2px);
+  filter: brightness(1.02);
+}
+
+.activity-btn { 
+  transition: transform 160ms ease, filter 160ms ease; 
+}
+
 /* Mobile tweaks */
 @media (max-width: 420px) {
   .btn {
@@ -245,34 +268,33 @@ h1 {
 
 .heart {
   position: absolute;
-  width: 14px;
-  height: 14px;
+  width: var(--s, 14px);
+  height: var(--s, 14px);
   transform: rotate(45deg);
   opacity: 0.9;
   animation: floatUp linear forwards;
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.1));
+  background: currentColor;
 }
 
 .heart::before,
 .heart::after {
   content: "";
   position: absolute;
-  width: 14px;
-  height: 14px;
+  width: var(--s, 14px);
+  height: var(--s, 14px);
   background: currentColor;
   border-radius: 50%;
 }
 
-.heart {
-  background: currentColor;
-}
 .heart::before {
-  left: -7px;
+  left: calc(var(--s, 14px) * -0.5);
   top: 0;
 }
+
 .heart::after {
   left: 0;
-  top: -7px;
+  top: calc(var(--s, 14px) * -0.5);
 }
 
 @keyframes floatUp {
@@ -538,7 +560,7 @@ h1 {
   border: 1px solid rgba(0, 0, 0, 0.12);
   background: rgba(255, 255, 255, 0.95);
   cursor: pointer;
-  font-weight: 800;
+  font-weight: 600;
   box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
   transition: transform 150ms ease, filter 150ms ease, opacity 150ms ease;
 }
@@ -594,7 +616,7 @@ h1 {
   padding: 10px 14px;
   border-radius: 999px;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 600;
   background: rgba(0, 0, 0, 0.78);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -628,6 +650,38 @@ h1 {
     transform: translateX(-50%) translateY(8px);
     opacity: 0;
   }
+}
+
+/* Heart burst for right answers */
+.burst-heart {
+  position: fixed;
+  width: var(--s, 16px);
+  height: var(--s, 16px);
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: currentColor;
+  pointer-events: none;
+  z-index: 999999;
+  animation: burstFly 700ms ease-out forwards;
+  filter: drop-shadow(0 8px 14px rgba(255,77,109,0.25));
+}
+
+.burst-heart::before,
+.burst-heart::after {
+  content: "";
+  position: absolute;
+  width: var(--s, 16px);
+  height: var(--s, 16px);
+  background: currentColor;
+  border-radius: 50%;
+}
+
+.burst-heart::before { left: calc(var(--s, 16px) * -0.5); top: 0; }
+.burst-heart::after  { left: 0; top: calc(var(--s, 16px) * -0.5); }
+
+@keyframes burstFly {
+  0%   { opacity: 0; transform: translate(-50%, -50%) rotate(45deg) scale(0.6); }
+  15%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(45deg) scale(1.2); }
 }
 
 /* ========== Jigsaw: Piece by Piece ========== */
@@ -732,4 +786,27 @@ h1 {
   justify-content: center;
   gap: 12px;
   margin-top: 14px;
+}
+
+/* ========== Sparkle Cursor Trail ========== */
+.sparkle {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 999999;
+  background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,77,109,0.0) 70%);
+  filter: drop-shadow(0 6px 10px rgba(255,77,109,0.25));
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.6);
+  animation: sparklePop 520ms ease forwards;
+}
+
+@keyframes sparklePop {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  15% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.8); }
 }

@@ -92,6 +92,7 @@ const el = {
   btnRow: $("#btnRow"),
   heartsLayer: $("#hearts-layer"),
   bgMusic: $("#bgMusic"),
+  bgMusicAfter: $("#bgMusicAfter"),
 
   // sections
   planner: $("#planner"),
@@ -198,6 +199,33 @@ function showStart() {
   el.hint.classList.remove("hidden");
 }
 
+// ✨ Sparkle cursor trail
+let lastSparkle = 0;
+
+function spawnSparkle(x, y) {
+  const s = document.createElement("div");
+  s.className = "sparkle";
+  s.style.left = `${x}px`;
+  s.style.top = `${y}px`;
+
+  // tiny size variation
+  const sz = 6 + Math.random() * 10;
+  s.style.width = `${sz}px`;
+  s.style.height = `${sz}px`;
+
+  document.body.appendChild(s);
+  setTimeout(() => s.remove(), 550);
+}
+
+window.addEventListener("pointermove", (e) => {
+  const now = performance.now();
+  if (now - lastSparkle < 18) return; // throttle
+  lastSparkle = now;
+
+  // only sparkle when pointer is inside the window
+  spawnSparkle(e.clientX, e.clientY);
+});
+
 /***********************
  * 3) Initialize text
  ***********************/
@@ -214,10 +242,16 @@ el.resultText.textContent = CONFIG.yesResultText;
 /***********************
  * 4) Audio
  ***********************/
-function playMusicSafely() {
-  if (!el.bgMusic) return;
-  el.bgMusic.volume = 0.35;
-  el.bgMusic.play().catch(() => {});
+function playMusicSafely(which = "start") {
+  const audio = which === "after" ? el.bgMusicAfter : el.bgMusic;
+  if (!audio) return;
+
+  // pause the other track so they never overlap
+  const other = which === "after" ? el.bgMusic : el.bgMusicAfter;
+  if (other && !other.paused) other.pause();
+
+  audio.volume = 0.35;
+  audio.play().catch(() => {});
 }
 
 /***********************
@@ -280,7 +314,7 @@ const noPhrases = [
 ];
 
 el.noBtn.addEventListener("click", () => {
-  playMusicSafely();
+  playMusicSafely("start");
   noCount++;
 
   if (noCount >= FULLSCREEN_AFTER_NO_CLICKS) {
@@ -304,7 +338,7 @@ el.noBtn.addEventListener("mouseenter", () => {
 });
 
 el.yesBtn.addEventListener("click", () => {
-  playMusicSafely();
+  playMusicSafely("after");
 
   // If YES is fullscreen, remove overlay so planner is clickable/visible
   if (yesOverlayEl) {
@@ -870,6 +904,7 @@ el.gameArea.addEventListener("click", (e) => {
 
       photoGameCompleted = true;
       saveBool(SESSION_KEYS.photoDone, true);
+      startConfetti(); 
       updateGamesContinue();
       return;
     }
@@ -892,6 +927,23 @@ el.nextPhotoBtn.addEventListener("click", () => {
 /***********************
  * 8.1) Scratch to Reveal Game
  ***********************/
+function stampHeart(ctx, x, y, size) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(size / 30, size / 30);
+
+  ctx.beginPath();
+  ctx.moveTo(0, 10);
+  ctx.bezierCurveTo(0, -10, -20, -10, -20, 5);
+  ctx.bezierCurveTo(-20, 20, 0, 28, 0, 38);
+  ctx.bezierCurveTo(0, 28, 20, 20, 20, 5);
+  ctx.bezierCurveTo(20, -10, 0, -10, 0, 10);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
+
 function initScratchGame() {
   el.scratchImg.src = SCRATCH_PHOTO;
 
@@ -920,9 +972,7 @@ function initScratchGame() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    ctx.beginPath();
-    ctx.arc(x, y, 22, 0, Math.PI * 2);
-    ctx.fill();
+    stampHeart(ctx, x, y, 42); // ❤️ heart-shaped scratch brush
 
     checkScratchProgress(ctx);
   };
@@ -949,6 +999,7 @@ function checkScratchProgress(ctx) {
 
     el.scratchContinueBtn.classList.remove("hidden");
     spawnHearts(16);
+    startConfetti(); 
     updateGamesContinue();
   }
 }
@@ -1048,6 +1099,7 @@ function finishMemoryGame() {
   setMemoryStatus("All matched 🥹💞");
   el.memoryContinueBtn.classList.remove("hidden");
   spawnHearts(18);
+  startConfetti(); 
   updateGamesContinue();
 }
 
@@ -1370,8 +1422,30 @@ function finishLoveQuiz() {
   saveBool(SESSION_KEYS.loveQuizDone, true);
   loveQuizCompleted = true;
   spawnHearts(18);
+  startConfetti(); 
   updateGamesContinue();
   showLoveQuizScoreScreen();
+}
+
+function burstHeartsAt(x, y, count = 10) {
+  for (let i = 0; i < count; i++) {
+    const h = document.createElement("div");
+    h.className = "burst-heart";
+    h.style.left = `${x}px`;
+    h.style.top = `${y}px`;
+    h.style.color = randomHeartColor();
+
+    const s = 10 + Math.random() * 14;
+    h.style.setProperty("--s", `${s}px`);
+
+    const dx = (-80 + Math.random() * 160) + "px";
+    const dy = (-120 + Math.random() * 140) + "px";
+    h.style.setProperty("--dx", dx);
+    h.style.setProperty("--dy", dy);
+
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 750);
+  }
 }
 
 // Open quiz
@@ -1447,6 +1521,15 @@ el.loveQuizOptions.addEventListener("click", (e) => {
 
   el.loveQuizContinueBtn.classList.remove("hidden");
   spawnHearts(10);
+
+  // 💥 Heart burst from the clicked answer (6)
+  const rect = btn.getBoundingClientRect();
+  burstHeartsAt(
+    rect.left + rect.width / 2,
+    rect.top + rect.height / 2,
+    12
+  );
+
 });
 
 // Continue -> next question or final score screen
@@ -1713,8 +1796,7 @@ function spawnHearts(count = 10) {
     heart.style.color = randomHeartColor();
 
     const size = 10 + Math.random() * 18;
-    heart.style.width = `${size}px`;
-    heart.style.height = `${size}px`;
+    heart.style.setProperty("--s", `${size}px`);
 
     heart.style.left = `${Math.random() * 100}vw`;
     heart.style.bottom = "-5vh";
