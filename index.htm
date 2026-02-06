@@ -82,13 +82,18 @@
         <p class="tiny" id="gameStatus">0 / 3 photos unlocked</p>
 
         <div class="carousel-actions">
-          <button class="btn secondary hidden" id="prevPhotoBtn">◁ Previous photo</button>
-          <button class="btn yes hidden" id="nextPhotoBtn">Next photo ▷</button>
-          <button class="btn secondary" id="backBtn">◀ Back</button>
-        </div>
+          <!-- Photo navigation row -->
+          <div class="carousel-nav">
+            <button class="btn secondary hidden" id="prevPhotoBtn">◁ Previous photo</button>
+            <button class="btn yes hidden" id="nextPhotoBtn">Next photo ▷</button>
+          </div>
 
-        <!-- Final action -->
-        <button class="btn yes hidden" id="continueBtn">Continue ▶</button>
+          <!-- Game navigation row -->
+          <div class="carousel-game-actions">
+            <button class="btn secondary" id="backBtn">◀ Back</button>
+            <button class="btn yes hidden" id="continueBtn">Continue ▶</button>
+          </div>
+        </div>
       </section>
 
       <section class="panel scratch hidden" id="scratchGame">

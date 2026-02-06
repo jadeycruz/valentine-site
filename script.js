@@ -224,13 +224,29 @@ function spawnSparkle(x, y) {
   s.style.left = `${x}px`;
   s.style.top = `${y}px`;
 
-  // tiny size variation
-  const sz = 6 + Math.random() * 10;
-  s.style.width = `${sz}px`;
-  s.style.height = `${sz}px`;
+  // ❤️ random heart size
+  const size = 8 + Math.random() * 12;
+  s.style.setProperty("--s", `${size}px`);
+
+  // 💕 random pink / red shades
+  const colors = [
+    "#ff4d6d",
+    "#ff758f",
+    "#ff9aa2",
+    "#e63946",
+    "#ff6b81",
+  ];
+  s.style.setProperty(
+    "--c",
+    colors[Math.floor(Math.random() * colors.length)]
+  );
+
+  // ✨ random float direction
+  s.style.setProperty("--dx", `${(Math.random() - 0.5) * 40}px`);
+  s.style.setProperty("--dy", `${-20 - Math.random() * 40}px`);
 
   document.body.appendChild(s);
-  setTimeout(() => s.remove(), 550);
+  setTimeout(() => s.remove(), 700);
 }
 
 window.addEventListener("pointermove", (e) => {
@@ -762,11 +778,37 @@ let currentPhotoIndex = 0; // which photo we are working on (0..2)
 
 let targetX = 50; // percent
 let targetY = 50; // percent
+let prevTargetX = null;
+let prevTargetY = null;
+
 const HIT_RADIUS = 10; // percent
+const MIN_TARGET_DIST = 30; // 👈 how far apart targets must be (tweak 26–35)
 
 function setNewTarget() {
-  targetX = 15 + Math.random() * 70;
-  targetY = 20 + Math.random() * 60;
+  const maxTries = 40;
+  let x, y;
+
+  for (let i = 0; i < maxTries; i++) {
+    x = 15 + Math.random() * 70;
+    y = 20 + Math.random() * 60;
+
+    // first heart ever → accept immediately
+    if (prevTargetX === null || prevTargetY === null) break;
+
+    const dx = x - prevTargetX;
+    const dy = y - prevTargetY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    // accept only if FAR ENOUGH
+    if (dist >= MIN_TARGET_DIST) break;
+  }
+
+  targetX = x;
+  targetY = y;
+
+  // remember this target for next time
+  prevTargetX = targetX;
+  prevTargetY = targetY;
 }
 
 function updateProgressUI() {
