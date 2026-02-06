@@ -146,15 +146,18 @@ const el = {
   nextPhotoBtn: $("#nextPhotoBtn"),
   backBtn: $("#backBtn"),
 
-    // love quiz
+  // love quiz
   loveQuizBtn: $("#loveQuizBtn"),
   loveQuiz: $("#loveQuiz"),
+  loveQuizScore: $("#loveQuizScore"),
   loveQuizProgress: $("#loveQuizProgress"),
   loveQuizQuestion: $("#loveQuizQuestion"),
   loveQuizOptions: $("#loveQuizOptions"),
-  loveQuizBackBtn: $("#loveQuizBackBtn"),
   loveQuizContinueBtn: $("#loveQuizContinueBtn"),
-  loveQuizExitBtn: $("#loveQuizExitBtn"),
+  loveQuizBackToGamesBtn: $("#loveQuizBackToGamesBtn"),
+  loveQuizScoreLine: $("#loveQuizScoreLine"),
+  loveQuizScoreDetails: $("#loveQuizScoreDetails"),
+  loveQuizScoreBackBtn: $("#loveQuizScoreBackBtn"),
   quizToast: $("#quizToast"),
 
   // confetti
@@ -171,6 +174,7 @@ const SCREENS = [
   el.scratchGame,
   el.memoryGame,
   el.loveQuiz,
+  el.loveQuizScore,
   el.result,
 ];
 
@@ -549,6 +553,9 @@ const SESSION_KEYS = {
 
   // ✅ Love Quiz in-progress
   loveQuizIndex: "vday_lovequiz_index",
+  loveQuizSelected: "vday_lovequiz_selected",
+  loveQuizSolved: "vday_lovequiz_solved",
+  loveQuizWrongTotal: "vday_lovequiz_wrong_total",
 };
 
 function loadBool(key) {
@@ -583,7 +590,7 @@ const BASE_GAME_LABELS = {
   photo: el.photoGameBtn.textContent,
   scratch: el.scratchGameBtn.textContent,
   memory: el.memoryGameBtn.textContent,
-  loveQuiz: el.loveQuizBackBtn.textContent,
+  loveQuiz: el.loveQuizBtn.textContent,
 };
 
 function setCompletedBadge(btn, isDone) {
@@ -856,7 +863,7 @@ el.nextPhotoBtn.addEventListener("click", () => {
 });
 
 /***********************
- * 8.5) Scratch to Reveal Game
+ * 8.1) Scratch to Reveal Game
  ***********************/
 function initScratchGame() {
   el.scratchImg.src = SCRATCH_PHOTO;
@@ -928,7 +935,7 @@ el.scratchContinueBtn.addEventListener("click", () => {
 });
 
 /***********************
- * 8.8) Memory Match Game (4x3 = 12 cards)
+ * 8.2) Memory Match Game (4x3 = 12 cards)
  ***********************/
 let memoryDeck = [];
 let firstPick = null;
@@ -1107,13 +1114,14 @@ el.memoryContinueBtn.addEventListener("click", () => {
 });
 
 /***********************
- * 8.9) Love Quiz (10 Qs, 4 options)
+ * 8.3) Love Quiz (10 Qs, 4 options)
  ***********************/
 const LOVE_QUIZ_QUESTIONS = [
   {
     q: "What’s my most favorite thing to do with you? 👫",
     options: ["Play games 👾", "Watch TV 📺", "Do Nothing 📱", "Sleep 💤"],
     correctIndex: 0,
+    wrongMsg: "I love doing this with you too 😁.",
   },
   {
     q: "What makes me feel the most loved by you? 💖",
@@ -1124,6 +1132,7 @@ const LOVE_QUIZ_QUESTIONS = [
       "Public affection 👩‍❤‍👨",
     ],
     correctIndex: 1,
+    wrongMsg: "Close, but I still feel loved with whatever you do 💞.",
   },
   {
     q: "When do I feel the most at peace? 😌",
@@ -1134,6 +1143,7 @@ const LOVE_QUIZ_QUESTIONS = [
       "When I'm on your king-sized bed 🛏️",
     ],
     correctIndex: 2,
+    wrongMsg: "If you choosed bed then you're close but (hint) its what comes with the bed 😁.",
   },
   {
     q: "What’s something small you do that I love the most? 🤏",
@@ -1144,11 +1154,13 @@ const LOVE_QUIZ_QUESTIONS = [
       "Remembering tiny details 🧐",
     ],
     correctIndex: 2,
+    wrongMsg: "I honeslty love all of this too 🥺.",
   },
   {
     q: "What do I complain about the most? 💢",
     options: ["Being tired 🫩", "The weather ❄️", "Work 👩🏻‍💻", "Being hungry 😩"],
     correctIndex: 3,
+    wrongMsg: "I complain about anything tbh- fluent in yapanese 🗣️.",
   },
   {
     q: "What’s my “I can’t decide” phrase? 🤔",
@@ -1159,11 +1171,13 @@ const LOVE_QUIZ_QUESTIONS = [
       "Wait… let me think 🧠",
     ],
     correctIndex: 2,
+    wrongMsg: "Hmmm... try again 😛.",
   },
   {
     q: "What would I eat every day if I could? 🍽️",
     options: ["Sushi 🍣", "Pasta 🍝", "Cucumber 🥒", "Shawarma 🫔"],
     correctIndex: 0,
+    wrongMsg: "You better not have clicked cucumber 😡 if you didn't try again either way.",
   },
   {
     q: "What’s my worst habit? 🔄",
@@ -1174,11 +1188,13 @@ const LOVE_QUIZ_QUESTIONS = [
       "Forgetting to drink water 🫗",
     ],
     correctIndex: 2,
+    wrongMsg: "Yes but (hint) it stems from... 🥴",
   },
   {
     q: "What instantly puts me in a better mood?",
     options: ["Food 🍔", "You 🫵", "Music 🎵", "Taking a nap 😴"],
     correctIndex: 1,
+    wrongMsg: "Still a good answer but come on its Valentine's... you already know 🫵",
   },
   {
     q: "Why did I fall for you? 🫠",
@@ -1189,21 +1205,48 @@ const LOVE_QUIZ_QUESTIONS = [
       "All of the above 💖",
     ],
     correctIndex: 3,
+    wrongMsg: "(hint) All 🤧",
   },
 ];
 
 let loveQuizIndex = loadJSON(SESSION_KEYS.loveQuizIndex, 0);
+
+function getQuizSelected() {
+  return loadJSON(
+    SESSION_KEYS.loveQuizSelected,
+    Array(LOVE_QUIZ_QUESTIONS.length).fill(null),
+  );
+}
+function getQuizSolved() {
+  return loadJSON(
+    SESSION_KEYS.loveQuizSolved,
+    Array(LOVE_QUIZ_QUESTIONS.length).fill(false),
+  );
+}
+
+function getWrongTotal() {
+  return loadJSON(SESSION_KEYS.loveQuizWrongTotal, 0);
+}
+
+function setQuizSelected(arr) {
+  saveJSON(SESSION_KEYS.loveQuizSelected, arr);
+}
+
+function setQuizSolved(arr) {
+  saveJSON(SESSION_KEYS.loveQuizSolved, arr);
+}
+
+function setWrongTotal(n) {
+  saveJSON(SESSION_KEYS.loveQuizWrongTotal, n);
+}
 
 function showQuizToast(msg) {
   if (!el.quizToast) return;
   el.quizToast.textContent = msg;
   el.quizToast.classList.remove("hidden");
   el.quizToast.classList.remove("show");
-  // reflow to restart animation
   void el.quizToast.offsetHeight;
   el.quizToast.classList.add("show");
-
-  // Hide after animation
   setTimeout(() => {
     el.quizToast.classList.remove("show");
     el.quizToast.classList.add("hidden");
@@ -1216,66 +1259,81 @@ function clampQuizIndex() {
 }
 
 function renderLoveQuiz() {
-  loveQuizCompleted = loadBool(SESSION_KEYS.loveQuizDone);
-
-  // If completed, keep them at the end (last question view) but let them exit
-  if (loveQuizCompleted) {
-    el.loveQuizProgress.textContent = "Quiz completed ✅";
-    el.loveQuizQuestion.textContent = "You already finished the Love Quiz 🥹💞";
-    el.loveQuizOptions.innerHTML = `
-      <button class="quiz-option is-disabled" type="button" disabled>Perfect score energy 💘</button>
-    `;
-    el.loveQuizContinueBtn.classList.add("hidden");
-    return;
-  }
-
   clampQuizIndex();
+
+  const selected = getQuizSelected();
+  const solved = getQuizSolved();
+
   const item = LOVE_QUIZ_QUESTIONS[loveQuizIndex];
 
   el.loveQuizProgress.textContent = `Question ${loveQuizIndex + 1} / ${LOVE_QUIZ_QUESTIONS.length}`;
   el.loveQuizQuestion.textContent = item.q;
 
-  // build 4 option buttons
   const LETTERS = ["A", "B", "C", "D"];
 
   el.loveQuizOptions.innerHTML = item.options
-    .map(
-      (opt, idx) => `
+    .map((opt, idx) => {
+      return `
         <button class="quiz-option" type="button" data-idx="${idx}">
           <strong>${LETTERS[idx]}.</strong> ${escapeHtml(opt)}
         </button>
-      `
-    )
+      `;
+    })
     .join("");
 
-  // Continue hidden until correct answer selected
-  el.loveQuizContinueBtn.classList.add("hidden");
+  // default: Continue hidden unless solved
+  el.loveQuizContinueBtn.classList.toggle("hidden", !solved[loveQuizIndex]);
+
+  // Apply persisted styling:
+  const buttons = [...el.loveQuizOptions.querySelectorAll(".quiz-option")];
+  const chosen = selected[loveQuizIndex];
+
+  // If already solved, lock all + pop correct
+  if (solved[loveQuizIndex]) {
+    buttons.forEach((b) => {
+      const idx = Number(b.dataset.idx);
+      b.disabled = true;
+      if (idx === item.correctIndex) b.classList.add("is-correct");
+      else b.classList.add("is-disabled");
+    });
+    return;
+  }
+
+  // If they previously clicked a wrong option, keep that one grey+disabled
+  if (chosen !== null && chosen !== item.correctIndex) {
+    buttons.forEach((b) => {
+      const idx = Number(b.dataset.idx);
+      if (idx === chosen) {
+        b.disabled = true;
+        b.classList.add("is-wrong");
+      }
+    });
+  }
 }
 
-function lockQuizOptions(correctIdx) {
-  const buttons = [...el.loveQuizOptions.querySelectorAll(".quiz-option")];
-  buttons.forEach((b) => {
-    const idx = Number(b.dataset.idx);
-    b.disabled = true;
+function showLoveQuizScoreScreen() {
+  const solved = getQuizSolved();
+  const correct = solved.filter(Boolean).length; // based on right answers
+  const wrongTotal = getWrongTotal();
 
-    if (idx === correctIdx) {
-      b.classList.add("is-correct");
-    } else {
-      b.classList.add("is-disabled");
-    }
-  });
+  el.loveQuizScoreLine.textContent = `Final score: ${correct} / ${LOVE_QUIZ_QUESTIONS.length} ✅`;
+  el.loveQuizScoreDetails.textContent =
+    wrongTotal === 0
+      ? "No wrong tries 😭💞 you KNOW me."
+      : `Total wrong attempts: ${wrongTotal} 😈`;
+
+  showScreen(el.loveQuizScore);
 }
 
 function finishLoveQuiz() {
-  loveQuizCompleted = true;
   saveBool(SESSION_KEYS.loveQuizDone, true);
-  spawnHearts(16);
+  loveQuizCompleted = true;
+  spawnHearts(18);
   updateGamesContinue();
-
-  // exit back to games (same vibe as other games)
-  showScreen(el.gamesMenu);
+  showLoveQuizScoreScreen();
 }
 
+// Open quiz
 el.loveQuizBtn.addEventListener("click", () => {
   showScreen(el.loveQuiz);
   loveQuizIndex = loadJSON(SESSION_KEYS.loveQuizIndex, 0);
@@ -1283,6 +1341,13 @@ el.loveQuizBtn.addEventListener("click", () => {
   updateGamesContinue();
 });
 
+// One Back button: always back to games, progress preserved
+el.loveQuizBackToGamesBtn.addEventListener("click", () => {
+  showScreen(el.gamesMenu);
+  updateGamesContinue();
+});
+
+// Answer click
 el.loveQuizOptions.addEventListener("click", (e) => {
   const btn = e.target.closest(".quiz-option");
   if (!btn) return;
@@ -1291,29 +1356,57 @@ el.loveQuizOptions.addEventListener("click", (e) => {
   const item = LOVE_QUIZ_QUESTIONS[loveQuizIndex];
   if (!item) return;
 
+  const selected = getQuizSelected();
+  const solved = getQuizSolved();
+
+  // If already solved, ignore
+  if (solved[loveQuizIndex]) return;
+
+  // If they click the same wrong button again (unlikely), ignore
+  if (selected[loveQuizIndex] === idx && idx !== item.correctIndex) return;
+
   if (idx !== item.correctIndex) {
-    showQuizToast("Wrong 😈 Try again!");
+    // save wrong choice, disable just that one
+    selected[loveQuizIndex] = idx;
+    setQuizSelected(selected);
+
+    const wrongTotal = getWrongTotal() + 1;
+    setWrongTotal(wrongTotal);
+
+    showQuizToast(item.wrongMsg || "Wrong 😈 Try again!");
     spawnHearts(2);
+
+    // re-render to apply “greyed” persistence
+    renderLoveQuiz();
     return;
   }
 
-  // ✅ Correct: grey out the rest + show Continue
-  lockQuizOptions(item.correctIndex);
+  // correct ✅
+  selected[loveQuizIndex] = idx;
+  setQuizSelected(selected);
+
+  solved[loveQuizIndex] = true;
+  setQuizSolved(solved);
+
+  // lock all + pop correct
+  const buttons = [...el.loveQuizOptions.querySelectorAll(".quiz-option")];
+  buttons.forEach((b) => {
+    const bIdx = Number(b.dataset.idx);
+    b.disabled = true;
+    if (bIdx === item.correctIndex) b.classList.add("is-correct");
+    else b.classList.add("is-disabled");
+  });
+
   el.loveQuizContinueBtn.classList.remove("hidden");
-  spawnHearts(8);
+  spawnHearts(10);
 });
 
-el.loveQuizBackBtn.addEventListener("click", () => {
-  // per-question back:
-  loveQuizIndex = loadJSON(SESSION_KEYS.loveQuizIndex, 0);
-  loveQuizIndex = Math.max(0, loveQuizIndex - 1);
-  saveJSON(SESSION_KEYS.loveQuizIndex, loveQuizIndex);
-  renderLoveQuiz();
-});
-
+// Continue -> next question or final score screen
 el.loveQuizContinueBtn.addEventListener("click", () => {
-  // go next question or finish
-  loveQuizIndex = loadJSON(SESSION_KEYS.loveQuizIndex, 0);
+  const solved = getQuizSolved();
+
+  // Safety: only continue if current is solved
+  if (!solved[loveQuizIndex]) return;
 
   if (loveQuizIndex >= LOVE_QUIZ_QUESTIONS.length - 1) {
     finishLoveQuiz();
@@ -1325,7 +1418,8 @@ el.loveQuizContinueBtn.addEventListener("click", () => {
   renderLoveQuiz();
 });
 
-el.loveQuizExitBtn.addEventListener("click", () => {
+// Score screen back
+el.loveQuizScoreBackBtn.addEventListener("click", () => {
   showScreen(el.gamesMenu);
   updateGamesContinue();
 });
@@ -1481,7 +1575,11 @@ el.restartBtn.addEventListener("click", () => {
   sessionStorage.removeItem(SESSION_KEYS.memoryDeck);
   sessionStorage.removeItem(SESSION_KEYS.memoryMatchedIds);
 
+  sessionStorage.removeItem(SESSION_KEYS.loveQuizDone);
   sessionStorage.removeItem(SESSION_KEYS.loveQuizIndex);
+  sessionStorage.removeItem(SESSION_KEYS.loveQuizSelected);
+  sessionStorage.removeItem(SESSION_KEYS.loveQuizSolved);
+  sessionStorage.removeItem(SESSION_KEYS.loveQuizWrongTotal);
 
   photoGameCompleted = false;
   scratchGameCompleted = false;
