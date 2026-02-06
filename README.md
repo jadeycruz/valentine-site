@@ -35,12 +35,10 @@ _2.4.26_
 _2.5.26_
 - Done (2.5.26) ~~Add mini game: love quiz~~
 - Done (2.5.26) ~~Add mini game: Piece by Piece~~
-- Add mini game: pop the bubble (why i love you unlocks)
+- Done (2.6.26) ~~Add mini game: pop the bubble (why i love you unlocks)~~
 - Add mini game: Love Dash
 - Add minigame: heart blaster
 
 - Done (2.6.26) ~~add heart bursts per correct answer in love quiz~~
 - Done (2.6.26) ~~add confetti when each game finish~~
 
-
-add continue on love quiz result screen and piece by piece
