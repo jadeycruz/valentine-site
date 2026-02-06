@@ -959,22 +959,12 @@ function stampHeart(ctx, x, y, size) {
 }
 
 function initScratchGame() {
-  el.scratchImg.src = SCRATCH_PHOTO;
-
   const canvas = el.scratchCanvas;
   const ctx = canvas.getContext("2d");
 
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = Math.floor(rect.width);
-  canvas.height = Math.floor(rect.height);
-
-  ctx.globalCompositeOperation = "source-over";
-  ctx.fillStyle = "#bdbdbd";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.globalCompositeOperation = "destination-out";
-
   let scratching = false;
 
+  // ✅ mouse controls
   canvas.onmousedown = () => (scratching = true);
   canvas.onmouseup = () => (scratching = false);
   canvas.onmouseleave = () => (scratching = false);
@@ -986,10 +976,27 @@ function initScratchGame() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    stampHeart(ctx, x, y, 32); // ❤️ heart-shaped scratch brush
-
+    stampHeart(ctx, x, y, 32); // ❤️ keep using your brush
     checkScratchProgress(ctx);
   };
+
+  // ✅ important: size + paint AFTER the image loads
+  el.scratchImg.onload = () => {
+    const rect = el.scratchImg.getBoundingClientRect();
+    canvas.width = Math.floor(rect.width);
+    canvas.height = Math.floor(rect.height);
+
+    // paint grey overlay (normal mode)
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = "#bdbdbd";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // switch to erase mode
+    ctx.globalCompositeOperation = "destination-out";
+  };
+
+  // set src last so onload fires
+  el.scratchImg.src = SCRATCH_PHOTO;
 }
 
 function checkScratchProgress(ctx) {
@@ -1265,7 +1272,7 @@ const LOVE_QUIZ_QUESTIONS = [
       "You choose 🫵",
       "Wait… let me think 🧠",
     ],
-    correctIndex: 2,
+    correctIndex: 1,
     wrongMsg: "Hmmm... try again 😛.",
   },
   {
@@ -1294,9 +1301,9 @@ const LOVE_QUIZ_QUESTIONS = [
   {
     q: "Why did I fall for you? 🫠",
     options: [
-      "You made me feel safe 🛡️",
-      "You understood me 💡",
-      "You made me laugh 😂",
+      "You're tall 🧍🏾‍♂️",
+      "You're caring and loving and thoughtful and amazing and cool and  i can keep going...💡",
+      "You're funny 😂",
       "All of the above 💖",
     ],
     correctIndex: 3,
