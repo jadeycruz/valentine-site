@@ -29,6 +29,20 @@ const ALL_PHOTOS = [
   "photos/photo9.jpg",
   "photos/photo10.jpg",
   "photos/photo11.jpg",
+  "photos/photo12.jpg",
+  "photos/photo13.jpg",
+  "photos/photo14.jpg",
+  "photos/photo15.jpg",
+  "photos/photo16.jpg",
+  "photos/photo17.jpg",
+  "photos/photo18.jpg",
+  "photos/photo19.jpg",
+  "photos/photo20.jpg",
+  "photos/photo21.jpg",
+  "photos/photo22.jpg",
+  "photos/photo23.jpg",
+  "photos/photo24.jpg",
+  "photos/photo25.jpg",
 ];
 
 // Mini-game photos (always exactly 3 per run)
@@ -972,7 +986,7 @@ function initScratchGame() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    stampHeart(ctx, x, y, 42); // ❤️ heart-shaped scratch brush
+    stampHeart(ctx, x, y, 32); // ❤️ heart-shaped scratch brush
 
     checkScratchProgress(ctx);
   };
