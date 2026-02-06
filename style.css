@@ -329,11 +329,11 @@ h1 {
 }
 
 /* ========== Confetti Canvas ========== */
-#confetti {
+#confetti{
   position: fixed;
   inset: 0;
-  pointer-events: none;
   z-index: 9999;
+  pointer-events: none;
 }
 
 /* ===== Activity Planner ===== */
@@ -786,11 +786,17 @@ h1 {
 
 .jigsaw-piece {
   width: 80px;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 4 / 5;          /* 🔒 enforce 4:5 */
+  height: auto;
+
   border-radius: 14px;
   border: 1px solid rgba(0, 0, 0, 0.12);
   box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
+
   background-repeat: no-repeat;
+  background-size: cover;      /* 🔑 important */
+  background-position: center; /* 🔑 important */
+
   cursor: grab;
   user-select: none;
   touch-action: none;

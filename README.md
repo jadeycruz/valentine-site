@@ -42,7 +42,5 @@ _2.5.26_
 - Done (2.6.26) ~~add heart bursts per correct answer in love quiz~~
 - Done (2.6.26) ~~add confetti when each game finish~~
 
-add continue to unlock photos that leads to game menu
-for unlock photo i want to be able to look at previous unlocked photos
-make ratio for memory match and piecebypiece 4:5
-confetti didnt show for piecebypiece upon completion
+- change shape of pieces in pieace by piece to sharp edges instead of round and lower the gaps even more. pieces on the tray is still not 4:5 ratio and photos look squished
+- love quiz and scratch to reveal doenst have confetti upon completion

@@ -1974,6 +1974,7 @@ let confettiRunning = false;
 let confettiEmitting = false;
 let rafId = null;
 let confettiStopTimer = null;
+let confettiBurstId = 0; 
 
 function resizeCanvas() {
   el.confettiCanvas.width = window.innerWidth * devicePixelRatio;
@@ -1998,24 +1999,34 @@ function makeConfettiPiece() {
 }
 
 function startConfetti() {
-  // start loop if not already running
+  // ✅ make every call unique
+  confettiBurstId++;
+
+  // ✅ ensure canvas visible (you already added something like this)
+  el.confettiCanvas.classList.remove("hidden");
+  el.confettiCanvas.style.display = "block";
+
+  // ✅ start loop if needed
   if (!confettiRunning) {
     confettiRunning = true;
     loopConfetti();
   }
 
-  // start emitting new pieces
+  // ✅ begin emitting (again)
   confettiEmitting = true;
 
-  // burst some pieces immediately
+  // ✅ immediate burst (always visible even if stop triggers soon)
   confettiPieces.push(...Array.from({ length: 90 }, makeConfettiPiece));
 
-  // stop emitting after a bit (but let the current pieces finish falling)
+  // ✅ stop emitting ONLY if this is still the latest burst
+  const myBurst = confettiBurstId;
   if (confettiStopTimer) clearTimeout(confettiStopTimer);
+
   confettiStopTimer = setTimeout(() => {
+    if (confettiBurstId !== myBurst) return; // another burst happened after
     confettiEmitting = false;
     confettiStopTimer = null;
-  }, 1400); // adjust to taste (1000–2000ms)
+  }, 1400);
 }
 
 function stopConfetti() {
@@ -2032,7 +2043,7 @@ function loopConfetti() {
 
   // if still emitting, drip a few new ones per frame (nice “producing” feel)
   if (confettiEmitting) {
-    confettiPieces.push(...Array.from({ length: 4 }, makeConfettiPiece));
+    confettiPieces.push(...Array.from({ length: 6 }, makeConfettiPiece));
   }
 
   // update + draw + remove offscreen pieces
@@ -2082,7 +2093,6 @@ el.restartBtn.addEventListener("click", () => {
   sessionStorage.removeItem(SESSION_KEYS.memoryDeck);
   sessionStorage.removeItem(SESSION_KEYS.memoryMatchedIds);
 
-  sessionStorage.removeItem(SESSION_KEYS.loveQuizDone);
   sessionStorage.removeItem(SESSION_KEYS.loveQuizDone);
   sessionStorage.removeItem(SESSION_KEYS.loveQuizIndex);
   sessionStorage.removeItem(SESSION_KEYS.loveQuizSelected);
