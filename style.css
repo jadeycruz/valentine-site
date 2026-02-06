@@ -578,6 +578,13 @@ h1 {
   margin-top: 12px;
 }
 
+#loveQuizScoreLine {
+  font-size: 16px;
+  font-weight: 900;
+  opacity: 0.9;
+  margin-top: 12px;
+}
+
 /* Toast popup for wrong answers */
 .quiz-toast {
   position: absolute;
@@ -598,7 +605,7 @@ h1 {
 
 .quiz-toast.show {
   opacity: 1;
-  animation: toastPop 0.9s ease forwards;
+  animation: toastPop 2.8s ease forwards;
 }
 
 @keyframes toastPop {
@@ -606,11 +613,11 @@ h1 {
     transform: translateX(-50%) translateY(8px);
     opacity: 0;
   }
-  20% {
+  10% {
     transform: translateX(-50%) translateY(0px);
     opacity: 1;
   }
-  80% {
+  85% {
     transform: translateX(-50%) translateY(0px);
     opacity: 1;
   }

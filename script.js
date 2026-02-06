@@ -1250,7 +1250,7 @@ function showQuizToast(msg) {
   setTimeout(() => {
     el.quizToast.classList.remove("show");
     el.quizToast.classList.add("hidden");
-  }, 900);
+  }, 2800);
 }
 
 function clampQuizIndex() {
@@ -1312,15 +1312,15 @@ function renderLoveQuiz() {
 }
 
 function showLoveQuizScoreScreen() {
-  const solved = getQuizSolved();
-  const correct = solved.filter(Boolean).length; // based on right answers
   const wrongTotal = getWrongTotal();
 
-  el.loveQuizScoreLine.textContent = `Final score: ${correct} / ${LOVE_QUIZ_QUESTIONS.length} ✅`;
-  el.loveQuizScoreDetails.textContent =
+  el.loveQuizScoreLine.textContent =
     wrongTotal === 0
-      ? "No wrong tries 😭💞 you KNOW me."
-      : `Total wrong attempts: ${wrongTotal} 😈`;
+      ? "Total wrong attempts: 0 😭💞"
+      : `Total wrong attempts: ${wrongTotal} 👎 Boo! 🍅🍅🍅`;
+
+  // clear the second line (optional)
+  el.loveQuizScoreDetails.textContent = "";
 
   showScreen(el.loveQuizScore);
 }
@@ -1335,6 +1335,13 @@ function finishLoveQuiz() {
 
 // Open quiz
 el.loveQuizBtn.addEventListener("click", () => {
+  loveQuizCompleted = loadBool(SESSION_KEYS.loveQuizDone);
+
+  if (loveQuizCompleted) {
+    showLoveQuizScoreScreen(); // opens the score screen
+    return;
+  }
+
   showScreen(el.loveQuiz);
   loveQuizIndex = loadJSON(SESSION_KEYS.loveQuizIndex, 0);
   renderLoveQuiz();

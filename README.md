@@ -41,6 +41,3 @@ _2.5.26_
 - Add mini game: pop the bubble (why i love you unlocks)
 - Add mini game: Love Dash
 - Add minigame: heart blaster
-
-
-
