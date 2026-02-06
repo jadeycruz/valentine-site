@@ -15,14 +15,14 @@
       <p class="to-line" id="toLine"></p>
 
       <h1 id="mainMessage">Will you be my Valentine? 💖</h1>
-      <p class="sub" id="subMessage">I promise to stop being annoying and lazy and a fatass.</p>
+      <p class="sub" id="subMessage">I promise to not be annoying and lazy and a fatass.</p>
 
       <div class="btn-row" id="btnRow">
         <button id="yesBtn" class="btn yes">YES</button>
         <button id="noBtn" class="btn no">No</button>
       </div>
 
-      <p class="hint" id="hint">Tip: Don't you fkn dare press "No".</p>
+      <p class="hint" id="hint">Tip: Don't you dare press NO</p>
 
       <section class="panel planner hidden" id="planner">
         <h2>Yay! Let’s plan our date 💘</h2>
@@ -31,11 +31,11 @@
         <div id="plannerView"></div>
 
         <div class="planner-actions">
-          <button id="cancelPlanBtn" class="btn secondary">Back</button>
-          <button id="donePlanningBtn" class="btn yes">Games →↠→⇨⇾▶▷</button>
+          <button id="cancelPlanBtn" class="btn secondary">◀ Back</button>
+          <button id="donePlanningBtn" class="btn yes">Games ▶</button>
         </div>
 
-        <p class="tiny" id="planHint">Tip: pick an activity we can do 😁</p>
+        <p class="tiny" id="planHint">Tip: you have to pick something 🥺</p>
 
         <div class="planner-export">
           <button id="exportTxtBtn" class="btn secondary">
@@ -46,7 +46,7 @@
 
       <section class="panel games hidden" id="gamesMenu">
         <h2>Pick a game 🎮</h2>
-        <p class="tiny">Please play them all I worked hard on em. TY!</p>
+        <p class="tiny">Please play them all I worked hard on em. Ty!</p>
 
         <div class="games-list">
           <button class="btn yes" id="photoGameBtn">Unlock Photos 📸💞</button>
@@ -56,25 +56,21 @@
         </div>
 
         <div class="games-actions">
-          <button class="btn secondary" id="gamesBackBtn">Back</button>
-          <button class="btn yes" id="gamesContinueBtn">Continue 💘</button>
+          <button class="btn secondary" id="gamesBackBtn">◀ Back</button>
+          <button class="btn yes" id="gamesContinueBtn">Continue ▶</button>
         </div>
       </section>
 
       <section class="panel carousel hidden" id="carousel">
         <h2 class="carousel-title">Unlock Photos 📸💞</h2>
-        <p class="tiny" id="gamePrompt">
-          Find the hidden heart to reveal the next photo 👀
-        </p>
+        <p class="tiny" id="gamePrompt">Find the hidden heart to reveal!</p>
 
         <div class="game-area" id="gameArea">
           <img id="carouselImg" class="game-photo hidden" alt="Cute photo" />
 
           <div class="game-overlay" id="gameOverlay">
             <div class="lock-text" id="lockText">🔒 Locked</div>
-            <div class="hint-text" id="hintText">
-              Click around to find the heart 💘
-            </div>
+            <div class="hint-text" id="hintText">Click around to find the heart 💘</div>
           </div>
 
           <div class="ping hidden" id="ping"></div>
@@ -85,17 +81,17 @@
         <p class="tiny" id="gameStatus">0 / 3 photos unlocked</p>
 
         <div class="carousel-actions">
-          <button class="btn yes hidden" id="nextPhotoBtn">Next photo ➜</button>
-          <button class="btn secondary" id="backBtn">Back</button>
+          <button class="btn yes hidden" id="nextPhotoBtn">Next photo ▷</button>
+          <button class="btn secondary" id="backBtn">◀ Back</button>
         </div>
 
         <!-- Final action -->
-        <button class="btn yes hidden" id="continueBtn">Continue 💘</button>
+        <button class="btn yes hidden" id="continueBtn">Continue ▶</button>
       </section>
 
       <section class="panel scratch hidden" id="scratchGame">
         <h2>Scratch to Reveal ✨🪙</h2>
-        <p class="tiny">Scratch the grey layer to reveal the photo!</p>
+        <p class="tiny">Scratch the grey layer to reveal!</p>
 
         <div class="scratch-area">
           <img
@@ -108,10 +104,8 @@
         </div>
 
         <div class="scratch-actions">
-          <button class="btn secondary" id="scratchBackBtn">Back</button>
-          <button class="btn yes hidden" id="scratchContinueBtn">
-            Continue 💘
-          </button>
+          <button class="btn secondary" id="scratchBackBtn">◀ Back</button>
+          <button class="btn yes hidden" id="scratchContinueBtn">Continue ▶</button>
         </div>
       </section>
 
@@ -122,10 +116,8 @@
         <div class="memory-grid" id="memoryGrid" aria-label="Memory grid"></div>
 
         <div class="memory-actions">
-          <button class="btn secondary" id="memoryBackBtn">Back</button>
-          <button class="btn yes hidden" id="memoryContinueBtn">
-            Continue 💘
-          </button>
+          <button class="btn secondary" id="memoryBackBtn">◀ Back</button>
+          <button class="btn yes hidden" id="memoryContinueBtn"> Continue ▶</button>
         </div>
       </section>
 
@@ -142,8 +134,8 @@
         </div>
 
         <div class="quiz-actions">
-          <button class="btn secondary" id="loveQuizBackToGamesBtn">Back</button>
-          <button class="btn yes hidden" id="loveQuizContinueBtn">Continue</button>
+          <button class="btn secondary" id="loveQuizBackToGamesBtn">◀ Back</button>
+          <button class="btn yes hidden" id="loveQuizContinueBtn">Continue ▶</button>
         </div>
       </section>
 
@@ -153,17 +145,17 @@
         <p class="tiny" id="loveQuizScoreDetails"></p>
 
         <div class="quiz-actions">
-          <button class="btn secondary" id="loveQuizScoreBackBtn">Back</button>
+          <button class="btn secondary" id="loveQuizScoreBackBtn">◀ Back</button>
         </div>
       </section>
 
       <section class="panel result hidden" id="result">
-        <h2 id="resultTitle">YAYYYYY!!! 💘 Let's plan some stuff together.</h2>
-        <p id="resultText">You made the right choice young one. Hehe!</p>
+        <h2 id="resultTitle">YAYYYYY!!! 💘 Thanks for playing 🥺.</h2>
+        <p id="resultText">I love you so much! Heehee!</p>
 
         <div class="games-actions">
-          <button id="replayBackBtn" class="btn secondary">Back</button>
-          <button id="restartBtn" class="btn secondary">Replay</button>
+          <button id="replayBackBtn" class="btn secondary">◀ Back</button>
+          <button id="restartBtn" class="btn secondary">↻ Replay</button>
         </div>
       </section>
 

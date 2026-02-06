@@ -580,7 +580,7 @@ h1 {
 
 #loveQuizScoreLine {
   font-size: 16px;
-  font-weight: 900;
+  font-weight: 500;
   opacity: 0.9;
   margin-top: 12px;
 }
@@ -613,14 +613,17 @@ h1 {
     transform: translateX(-50%) translateY(8px);
     opacity: 0;
   }
+
   10% {
     transform: translateX(-50%) translateY(0px);
     opacity: 1;
   }
-  85% {
+
+  75% {
     transform: translateX(-50%) translateY(0px);
     opacity: 1;
   }
+
   100% {
     transform: translateX(-50%) translateY(8px);
     opacity: 0;

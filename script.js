@@ -10,8 +10,8 @@ const CONFIG = {
   toLine: "To: ",
   mainMessage: "Will you be my Valentine? 💖",
   subMessage: "I promise to stop being annoying and lazy and a fatass.",
-  yesResultTitle: "YAYYYYY!!! 💘",
-  yesResultText: "Best decision ever. I’m so excited!!!",
+  yesResultTitle: "YAYYYYY!!! 💘 Thanks for playing 🥺",
+  yesResultText: "I love you so much! Heehee!",
   yesButtonText: "YES",
   noButtonText: "No",
 };
@@ -627,7 +627,7 @@ function updateGamesContinue() {
   ) {
     el.gamesContinueBtn.classList.remove("hidden");
     el.gamesContinueBtn.disabled = false;
-    el.gamesContinueBtn.textContent = "Finish 💘";
+    el.gamesContinueBtn.textContent = "Finish ▶";
   } else {
     el.gamesContinueBtn.classList.add("hidden");
     el.gamesContinueBtn.disabled = true;
@@ -1116,6 +1116,8 @@ el.memoryContinueBtn.addEventListener("click", () => {
 /***********************
  * 8.3) Love Quiz (10 Qs, 4 options)
  ***********************/
+let quizToastTimer = null;
+
 const LOVE_QUIZ_QUESTIONS = [
   {
     q: "What’s my most favorite thing to do with you? 👫",
@@ -1242,14 +1244,26 @@ function setWrongTotal(n) {
 
 function showQuizToast(msg) {
   if (!el.quizToast) return;
+
+  // Update text immediately
   el.quizToast.textContent = msg;
+
+  // Make sure it's visible
   el.quizToast.classList.remove("hidden");
+
+  // Restart animation every time
   el.quizToast.classList.remove("show");
-  void el.quizToast.offsetHeight;
+  void el.quizToast.offsetHeight; // reflow
   el.quizToast.classList.add("show");
-  setTimeout(() => {
+
+  // ✅ Reset the hide timer if they spam wrong answers
+  if (quizToastTimer) clearTimeout(quizToastTimer);
+
+  // Match this to your CSS animation duration (e.g., 2800ms)
+  quizToastTimer = setTimeout(() => {
     el.quizToast.classList.remove("show");
     el.quizToast.classList.add("hidden");
+    quizToastTimer = null;
   }, 2800);
 }
 
