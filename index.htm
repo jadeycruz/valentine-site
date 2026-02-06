@@ -15,9 +15,7 @@
       <p class="to-line" id="toLine"></p>
 
       <h1 id="mainMessage">Will you be my Valentine? 💖</h1>
-      <p class="sub" id="subMessage">
-        I promise to stop being annoying and lazy and a fatass.
-      </p>
+      <p class="sub" id="subMessage">I promise to stop being annoying and lazy and a fatass.</p>
 
       <div class="btn-row" id="btnRow">
         <button id="yesBtn" class="btn yes">YES</button>
@@ -53,14 +51,10 @@
         <p class="tiny">Please play them all I worked hard on em. TY!</p>
 
         <div class="games-list">
-          <button class="btn yes" id="photoGameBtn">
-            Photo Mini Game 📸💞
-          </button>
-          <button class="btn yes" id="scratchGameBtn">
-            Scratch to Reveal ✨🪙
-          </button>
+          <button class="btn yes" id="photoGameBtn">Unlock Photos 📸💞</button>
+          <button class="btn yes" id="scratchGameBtn">Scratch to Reveal ✨🪙</button>
           <button class="btn yes" id="memoryGameBtn">Memory Match 🧠💘</button>
-          <button class="btn secondary" disabled>Game 4 (coming soon)</button>
+          <button class="btn yes" id="loveQuizBtn">Love Quiz 💘📝</button>
         </div>
 
         <div class="games-actions">
@@ -70,7 +64,7 @@
       </section>
 
       <section class="panel carousel hidden" id="carousel">
-        <h2 class="carousel-title">Unlock our photos 💞</h2>
+        <h2 class="carousel-title">Unlock Photos 📸💞</h2>
         <p class="tiny" id="gamePrompt">
           Find the hidden heart to reveal the next photo 👀
         </p>
@@ -137,6 +131,28 @@
         </div>
       </section>
 
+      <section class="panel quiz hidden" id="loveQuiz">
+        <h2>Love Quiz 💘📝</h2>
+        <p class="tiny" id="loveQuizProgress">Question 1 / 10</p>
+
+        <div class="quiz-box">
+          <p class="quiz-question" id="loveQuizQuestion">Question text…</p>
+
+          <div class="quiz-options" id="loveQuizOptions" aria-label="Quiz options">
+            <!-- JS injects 4 option buttons -->
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="btn secondary" id="loveQuizBackBtn">Back</button>
+          <button class="btn yes hidden" id="loveQuizContinueBtn">Continue ➜</button>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="btn secondary" id="loveQuizExitBtn">Back to Games 🎮</button>
+        </div>
+      </section>
+
       <section class="panel result hidden" id="result">
         <h2 id="resultTitle">YAYYYYY!!! 💘 Let's plan some stuff together.</h2>
         <p id="resultText">You made the right choice young one. Hehe!</p>
@@ -146,6 +162,8 @@
           <button id="restartBtn" class="btn secondary">Replay</button>
         </div>
       </section>
+
+      <div id="quizToast" class="quiz-toast hidden" role="status" aria-live="polite"></div>
 
       <audio id="bgMusic" preload="auto" loop>
         <!-- Option A: use your own file by placing it in the folder and naming it music.mp3 -->

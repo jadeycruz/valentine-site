@@ -146,6 +146,17 @@ const el = {
   nextPhotoBtn: $("#nextPhotoBtn"),
   backBtn: $("#backBtn"),
 
+    // love quiz
+  loveQuizBtn: $("#loveQuizBtn"),
+  loveQuiz: $("#loveQuiz"),
+  loveQuizProgress: $("#loveQuizProgress"),
+  loveQuizQuestion: $("#loveQuizQuestion"),
+  loveQuizOptions: $("#loveQuizOptions"),
+  loveQuizBackBtn: $("#loveQuizBackBtn"),
+  loveQuizContinueBtn: $("#loveQuizContinueBtn"),
+  loveQuizExitBtn: $("#loveQuizExitBtn"),
+  quizToast: $("#quizToast"),
+
   // confetti
   confettiCanvas: $("#confetti"),
 };
@@ -159,6 +170,7 @@ const SCREENS = [
   el.carousel,
   el.scratchGame,
   el.memoryGame,
+  el.loveQuiz,
   el.result,
 ];
 
@@ -524,6 +536,7 @@ const SESSION_KEYS = {
   photoDone: "vday_photo_done",
   scratchDone: "vday_scratch_done",
   memoryDone: "vday_memory_done",
+  loveQuizDone: "vday_lovequiz_done",
 
   // ✅ Photo game in-progress
   photoUnlocked: "vday_photo_unlocked",
@@ -533,6 +546,9 @@ const SESSION_KEYS = {
   // ✅ Memory game in-progress
   memoryDeck: "vday_memory_deck",
   memoryMatchedIds: "vday_memory_matched_ids",
+
+  // ✅ Love Quiz in-progress
+  loveQuizIndex: "vday_lovequiz_index",
 };
 
 function loadBool(key) {
@@ -560,12 +576,14 @@ function saveJSON(key, val) {
 let photoGameCompleted = loadBool(SESSION_KEYS.photoDone);
 let scratchGameCompleted = loadBool(SESSION_KEYS.scratchDone);
 let memoryGameCompleted = loadBool(SESSION_KEYS.memoryDone);
+let loveQuizCompleted = loadBool(SESSION_KEYS.loveQuizDone);
 
 // ✅ Save the original button labels (so we can restore them)
 const BASE_GAME_LABELS = {
   photo: el.photoGameBtn.textContent,
   scratch: el.scratchGameBtn.textContent,
   memory: el.memoryGameBtn.textContent,
+  loveQuiz: el.loveQuizBackBtn.textContent,
 };
 
 function setCompletedBadge(btn, isDone) {
@@ -582,17 +600,24 @@ function updateCompletedBadges() {
   photoGameCompleted = loadBool(SESSION_KEYS.photoDone);
   scratchGameCompleted = loadBool(SESSION_KEYS.scratchDone);
   memoryGameCompleted = loadBool(SESSION_KEYS.memoryDone);
+  loveQuizCompleted = loadBool(SESSION_KEYS.loveQuizDone);
 
   setCompletedBadge(el.photoGameBtn, photoGameCompleted);
   setCompletedBadge(el.scratchGameBtn, scratchGameCompleted);
   setCompletedBadge(el.memoryGameBtn, memoryGameCompleted);
+  setCompletedBadge(el.loveQuizBtn, loveQuizCompleted);
 }
 
 function updateGamesContinue() {
   // ✅ update button badges first (also refreshes booleans)
   updateCompletedBadges();
 
-  if (photoGameCompleted && scratchGameCompleted && memoryGameCompleted) {
+  if (
+    photoGameCompleted && 
+    scratchGameCompleted && 
+    memoryGameCompleted && 
+    loveQuizCompleted
+  ) {
     el.gamesContinueBtn.classList.remove("hidden");
     el.gamesContinueBtn.disabled = false;
     el.gamesContinueBtn.textContent = "Finish 💘";
@@ -1082,6 +1107,230 @@ el.memoryContinueBtn.addEventListener("click", () => {
 });
 
 /***********************
+ * 8.9) Love Quiz (10 Qs, 4 options)
+ ***********************/
+const LOVE_QUIZ_QUESTIONS = [
+  {
+    q: "What’s my most favorite thing to do with you? 👫",
+    options: ["Play games 👾", "Watch TV 📺", "Do Nothing 📱", "Sleep 💤"],
+    correctIndex: 0,
+  },
+  {
+    q: "What makes me feel the most loved by you? 💖",
+    options: [
+      "Hugs and Kisses 💋",
+      "Words and reassurance 💬",
+      "Gifts and surprises 🎁",
+      "Public affection 👩‍❤‍👨",
+    ],
+    correctIndex: 1,
+  },
+  {
+    q: "When do I feel the most at peace? 😌",
+    options: [
+      "When everything is perfectly planned 🎯",
+      "When I’m alone with my thoughts 💭",
+      "When I’m with you 👫",
+      "When I'm on your king-sized bed 🛏️",
+    ],
+    correctIndex: 2,
+  },
+  {
+    q: "What’s something small you do that I love the most? 🤏",
+    options: [
+      "Checking in on me ☑️",
+      "Holding my hand 🤝",
+      "Calling me pretty 🎀",
+      "Remembering tiny details 🧐",
+    ],
+    correctIndex: 2,
+  },
+  {
+    q: "What do I complain about the most? 💢",
+    options: ["Being tired 🫩", "The weather ❄️", "Work 👩🏻‍💻", "Being hungry 😩"],
+    correctIndex: 3,
+  },
+  {
+    q: "What’s my “I can’t decide” phrase? 🤔",
+    options: [
+      "I don’t know 🤷‍♀",
+      "Any preference ❓",
+      "You choose 🫵",
+      "Wait… let me think 🧠",
+    ],
+    correctIndex: 2,
+  },
+  {
+    q: "What would I eat every day if I could? 🍽️",
+    options: ["Sushi 🍣", "Pasta 🍝", "Cucumber 🥒", "Shawarma 🫔"],
+    correctIndex: 0,
+  },
+  {
+    q: "What’s my worst habit? 🔄",
+    options: [
+      "Overthinking 🤯",
+      "Staying up too late 🥱",
+      "Procrastinating 📱",
+      "Forgetting to drink water 🫗",
+    ],
+    correctIndex: 2,
+  },
+  {
+    q: "What instantly puts me in a better mood?",
+    options: ["Food 🍔", "You 🫵", "Music 🎵", "Taking a nap 😴"],
+    correctIndex: 1,
+  },
+  {
+    q: "Why did I fall for you? 🫠",
+    options: [
+      "You made me feel safe 🛡️",
+      "You understood me 💡",
+      "You made me laugh 😂",
+      "All of the above 💖",
+    ],
+    correctIndex: 3,
+  },
+];
+
+let loveQuizIndex = loadJSON(SESSION_KEYS.loveQuizIndex, 0);
+
+function showQuizToast(msg) {
+  if (!el.quizToast) return;
+  el.quizToast.textContent = msg;
+  el.quizToast.classList.remove("hidden");
+  el.quizToast.classList.remove("show");
+  // reflow to restart animation
+  void el.quizToast.offsetHeight;
+  el.quizToast.classList.add("show");
+
+  // Hide after animation
+  setTimeout(() => {
+    el.quizToast.classList.remove("show");
+    el.quizToast.classList.add("hidden");
+  }, 900);
+}
+
+function clampQuizIndex() {
+  loveQuizIndex = Math.max(0, Math.min(loveQuizIndex, LOVE_QUIZ_QUESTIONS.length - 1));
+  saveJSON(SESSION_KEYS.loveQuizIndex, loveQuizIndex);
+}
+
+function renderLoveQuiz() {
+  loveQuizCompleted = loadBool(SESSION_KEYS.loveQuizDone);
+
+  // If completed, keep them at the end (last question view) but let them exit
+  if (loveQuizCompleted) {
+    el.loveQuizProgress.textContent = "Quiz completed ✅";
+    el.loveQuizQuestion.textContent = "You already finished the Love Quiz 🥹💞";
+    el.loveQuizOptions.innerHTML = `
+      <button class="quiz-option is-disabled" type="button" disabled>Perfect score energy 💘</button>
+    `;
+    el.loveQuizContinueBtn.classList.add("hidden");
+    return;
+  }
+
+  clampQuizIndex();
+  const item = LOVE_QUIZ_QUESTIONS[loveQuizIndex];
+
+  el.loveQuizProgress.textContent = `Question ${loveQuizIndex + 1} / ${LOVE_QUIZ_QUESTIONS.length}`;
+  el.loveQuizQuestion.textContent = item.q;
+
+  // build 4 option buttons
+  const LETTERS = ["A", "B", "C", "D"];
+
+  el.loveQuizOptions.innerHTML = item.options
+    .map(
+      (opt, idx) => `
+        <button class="quiz-option" type="button" data-idx="${idx}">
+          <strong>${LETTERS[idx]}.</strong> ${escapeHtml(opt)}
+        </button>
+      `
+    )
+    .join("");
+
+  // Continue hidden until correct answer selected
+  el.loveQuizContinueBtn.classList.add("hidden");
+}
+
+function lockQuizOptions(correctIdx) {
+  const buttons = [...el.loveQuizOptions.querySelectorAll(".quiz-option")];
+  buttons.forEach((b) => {
+    const idx = Number(b.dataset.idx);
+    b.disabled = true;
+
+    if (idx === correctIdx) {
+      b.classList.add("is-correct");
+    } else {
+      b.classList.add("is-disabled");
+    }
+  });
+}
+
+function finishLoveQuiz() {
+  loveQuizCompleted = true;
+  saveBool(SESSION_KEYS.loveQuizDone, true);
+  spawnHearts(16);
+  updateGamesContinue();
+
+  // exit back to games (same vibe as other games)
+  showScreen(el.gamesMenu);
+}
+
+el.loveQuizBtn.addEventListener("click", () => {
+  showScreen(el.loveQuiz);
+  loveQuizIndex = loadJSON(SESSION_KEYS.loveQuizIndex, 0);
+  renderLoveQuiz();
+  updateGamesContinue();
+});
+
+el.loveQuizOptions.addEventListener("click", (e) => {
+  const btn = e.target.closest(".quiz-option");
+  if (!btn) return;
+
+  const idx = Number(btn.dataset.idx);
+  const item = LOVE_QUIZ_QUESTIONS[loveQuizIndex];
+  if (!item) return;
+
+  if (idx !== item.correctIndex) {
+    showQuizToast("Wrong 😈 Try again!");
+    spawnHearts(2);
+    return;
+  }
+
+  // ✅ Correct: grey out the rest + show Continue
+  lockQuizOptions(item.correctIndex);
+  el.loveQuizContinueBtn.classList.remove("hidden");
+  spawnHearts(8);
+});
+
+el.loveQuizBackBtn.addEventListener("click", () => {
+  // per-question back:
+  loveQuizIndex = loadJSON(SESSION_KEYS.loveQuizIndex, 0);
+  loveQuizIndex = Math.max(0, loveQuizIndex - 1);
+  saveJSON(SESSION_KEYS.loveQuizIndex, loveQuizIndex);
+  renderLoveQuiz();
+});
+
+el.loveQuizContinueBtn.addEventListener("click", () => {
+  // go next question or finish
+  loveQuizIndex = loadJSON(SESSION_KEYS.loveQuizIndex, 0);
+
+  if (loveQuizIndex >= LOVE_QUIZ_QUESTIONS.length - 1) {
+    finishLoveQuiz();
+    return;
+  }
+
+  loveQuizIndex++;
+  saveJSON(SESSION_KEYS.loveQuizIndex, loveQuizIndex);
+  renderLoveQuiz();
+});
+
+el.loveQuizExitBtn.addEventListener("click", () => {
+  showScreen(el.gamesMenu);
+  updateGamesContinue();
+});
+
+/***********************
  * 9) Floating hearts
  ***********************/
 function randomHeartColor() {
@@ -1223,6 +1472,7 @@ el.restartBtn.addEventListener("click", () => {
   sessionStorage.removeItem(SESSION_KEYS.photoDone);
   sessionStorage.removeItem(SESSION_KEYS.scratchDone);
   sessionStorage.removeItem(SESSION_KEYS.memoryDone);
+  sessionStorage.removeItem(SESSION_KEYS.loveQuizDone);
 
   sessionStorage.removeItem(SESSION_KEYS.photoUnlocked);
   sessionStorage.removeItem(SESSION_KEYS.photoIndex);
@@ -1231,9 +1481,12 @@ el.restartBtn.addEventListener("click", () => {
   sessionStorage.removeItem(SESSION_KEYS.memoryDeck);
   sessionStorage.removeItem(SESSION_KEYS.memoryMatchedIds);
 
+  sessionStorage.removeItem(SESSION_KEYS.loveQuizIndex);
+
   photoGameCompleted = false;
   scratchGameCompleted = false;
   memoryGameCompleted = false;
+  loveQuizCompleted = false;
 
   // reset game-specific UI
   el.scratchContinueBtn.classList.add("hidden");
